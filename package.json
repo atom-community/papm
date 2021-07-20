@@ -1,11 +1,11 @@
 {
-  "name": "atom-ide-template",
+  "name": "papm",
   "main": "dist/main.js",
   "version": "0.1.0",
   "author": "<Your Name>",
-  "description": "  ",
-  "keywords": [],
-  "repository": "https://github.com/atom-ide-community/atom-ide-template",
+  "description": "Performant Atom Package Manager",
+  "keywords": ["pnpm", "npm", "apm", "pm", "atom", "package-manager"],
+  "repository": "https://github.com/atom-community/papm",
   "license": "MIT",
   "scripts": {
     "format": "prettier --write .",

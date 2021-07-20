@@ -21,12 +21,12 @@ async function package_deps() {
   const deps: string[] = []
   if (deps.some((p) => !atom.packages.isPackageLoaded(p))) {
     // install if not installed
-    await (await import("atom-package-deps")).install("atom-ide-template-js", false)
+    await (await import("atom-package-deps")).install("papm-js", false)
     // enable if disabled
     deps
       .filter((p) => !atom.packages.isPackageLoaded(p))
       .forEach((p) => {
-        atom.notifications.addInfo(`Enabling package ${p} that is needed for "atom-ide-template-js"`)
+        atom.notifications.addInfo(`Enabling package ${p} that is needed for "papm-js"`)
         atom.packages.enablePackage(p)
       })
   }
