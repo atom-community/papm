@@ -1,25 +1,31 @@
 # papm
 
-This is a template for atom-ide-community packages using TypeScript.
+Performant Atom Package Manager
 
-It is recommended to use the TypeScript template, but there is a JavaScript version too [here](https://github.com/atom-ide-community/papm-js).
+![Build Status (Github Actions)](https://github.com/atom-community/papm/workflows/CI/badge.svg)
+[![Dependency Status](https://david-dm.org/atom-community/papm.svg)](https://david-dm.org/atom-community/papm)
+[![apm](https://img.shields.io/apm/dm/papm.svg)](https://github.com/atom-community/papm)
+[![apm](https://img.shields.io/apm/v/papm.svg)](https://github.com/atom-community/papm)
 
-Use `Ctrl+Shift+F` and replace `papm` with `atom-ide-packagename`. Then put your name in the license section and author section.
+# Roadmap
 
-![Build Status (Github Actions)](https://github.com/atom-ide-community/papm/workflows/CI/badge.svg)
-[![Dependency Status](https://david-dm.org/atom-ide-community/papm.svg)](https://david-dm.org/atom-ide-community/papm)
-[![apm](https://img.shields.io/apm/dm/papm.svg)](https://github.com/atom-ide-community/papm)
-[![apm](https://img.shields.io/apm/v/papm.svg)](https://github.com/atom-ide-community/papm)
+## Implementation Requirements (Future Features)
 
-## Features
+- `papm` shall use `pnpm`
+- `papm` shall not use GitHub tags for publishing (See [this] for the background)(https://github.com/atom/apm/issues/919))
+- `papm` shall publish the atom packages to either a `npm` registry, or use GitHub packages
+- `papm` shall be able to install the packages on the old registry (backward compatibility)
+- `papm` operations shall not block the UI
+- `papm` shall handle failed installations, bad connections, etc.
 
--
+## Strategy
 
-## Usage
+The strategy I suggest is to:
 
-## Roadmap
+- decaffeinate each file using https://decaffeinate-project.org/
+- replace the old dependencies of the resulting code with modern replacements
+- replace npm things with pnpm
 
-## Contributing
+https://github.com/atom-community/apm/tree/master/src
 
-- Let me know if you encounter any bugs.
-- Feature requests are always welcome.
+In the end, we can think about publishing on the `npm` registry or using Github packages
