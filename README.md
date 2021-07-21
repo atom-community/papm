@@ -12,9 +12,9 @@ Performant Atom Package Manager
 ## Implementation Requirements (Future Features)
 
 - `papm` shall use `pnpm`
-- `papm` shall not use GitHub tags for publishing (See [this] for the background)(https://github.com/atom/apm/issues/919))
-- `papm` shall publish the atom packages to either a `npm` registry, or use GitHub packages
-- `papm` shall be able to install the packages on the old registry (backward compatibility)
+- `papm` shall not use GitHub tags for publishing (See [this](https://github.com/atom/apm/issues/919) for the background)
+- `papm` shall either publish the atom packages to a `npm` registry, or use GitHub packages
+- `papm` shall be able to install the packages that are published on the old registry (backward compatibility)
 - `papm` operations shall not block the UI
 - `papm` shall handle failed installations, bad connections, etc.
 
