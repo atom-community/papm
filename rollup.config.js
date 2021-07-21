@@ -12,7 +12,7 @@ const RollupConfig = [
     input: "src/main.ts",
     output: [
       {
-        dir: "dist",
+        dir: "lib",
         format: "cjs",
         sourcemap: process.env.NODE_ENV === "development" ? "inline" : true,
       },
