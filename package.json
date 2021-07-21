@@ -12,7 +12,7 @@
     "test.format": "prettier . --check",
     "lint": "eslint . --fix",
     "test.lint": "eslint .",
-    "test": "node ./script/get-fixtures.js && atom --test spec",
+    "test": "node ./script/get-fixtures.js && npm run check-version && jasmine-focused --captureExceptions --coffee spec",
     "clean": "shx rm -rf dist",
     "tsc": "tsc -p src/tsconfig.json || echo done",
     "dev": "npm run clean && cross-env NODE_ENV=development cross-env BABEL_KEEP_MODULES=true rollup -c -w",
@@ -23,7 +23,6 @@
     "check-version": "node script/check-version.js"
   },
   "prettier": "prettier-config-atomic",
-  "atomTestRunner": "./spec/runner",
   "activationHooks": [
     "core:loaded-shell-environment"
   ],
@@ -60,15 +59,15 @@
     "yargs": "^3.32.0"
   },
   "devDependencies": {
-    "express": "^4.17.1",
-    "node-gyp": "^5.1.1",
     "@types/atom": "1.40.11",
-    "@types/jasmine": "^3.8.1",
+    "@types/jasmine": "^1",
     "@types/node": "^16.4.0",
-    "atom-jasmine3-test-runner": "^5.2.7",
     "build-commit": "0.1.4",
     "cross-env": "7.0.3",
     "eslint-config-atomic": "^1.16.2",
+    "express": "^4.17.1",
+    "jasmine-focused": "^1.0.7",
+    "node-gyp": "^5.1.1",
     "npm-check-updates": "11.8.3",
     "prettier-config-atomic": "^2.0.5",
     "rollup-plugin-atomic": "^2.4.0",
