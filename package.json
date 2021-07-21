@@ -4,7 +4,14 @@
   "version": "0.1.0",
   "author": "<Your Name>",
   "description": "Performant Atom Package Manager",
-  "keywords": ["pnpm", "npm", "apm", "pm", "atom", "package-manager"],
+  "keywords": [
+    "pnpm",
+    "npm",
+    "apm",
+    "pm",
+    "atom",
+    "package-manager"
+  ],
   "repository": "https://github.com/atom-community/papm",
   "license": "MIT",
   "scripts": {
@@ -69,6 +76,7 @@
     "eslint-config-atomic": "^1.16.2",
     "express": "^4.17.1",
     "jasmine-focused": "^1.0.7",
+    "node-downloader-helper": "^1.0.18",
     "node-gyp": "^5.1.1",
     "npm-check-updates": "11.8.3",
     "prettier-config-atomic": "^2.0.5",
