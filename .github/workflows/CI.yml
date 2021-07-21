@@ -25,12 +25,11 @@ jobs:
           channel: ${{ matrix.atom_channel }}
 
       - name: Install dependencies
-        run: |
-          apm install --production
-          npm install --only=dev
+        run: npm install
 
-      - name: Run tests 👩🏾‍💻
-        run: npm run test
+      - if: "!contains(matrix.os, 'windows')"
+        name: Run tests 👩🏾‍💻
+        run: ./bin/npm test
 
   Lint:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
