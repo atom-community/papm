@@ -13,3 +13,8 @@ package-lock.json
 dist
 stats.html
 /bin/node*
+
+# Spec fixtures
+node-v10.20.1.tar.gz
+node.lib
+node_x64.lib
