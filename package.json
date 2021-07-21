@@ -19,7 +19,8 @@
     "build": "npm run clean && cross-env NODE_ENV=production cross-env BABEL_KEEP_MODULES=true rollup -c",
     "build-commit": "build-commit -o dist",
     "bump": "ncu -u -x coffeescript",
-    "prepare": "npm run build"
+    "prepare": "npm run tsc && node script/postinstall.js",
+    "check-version": "node script/check-version.js"
   },
   "prettier": "prettier-config-atomic",
   "atomTestRunner": "./spec/runner",
