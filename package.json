@@ -15,7 +15,7 @@
     "lint": "eslint . --fix",
     "coffee": "coffee --compile --output lib src",
     "test.lint": "eslint .",
-    "test": "node ./script/get-fixtures.js && npm run check-version && jasmine-focused --captureExceptions --coffee spec",
+    "test": "npm run check-version && jasmine-focused --captureExceptions --coffee spec",
     "clean": "shx rm -rf dist",
     "tsc": "tsc -p src/tsconfig.json || echo done",
     "dev": "npm run clean && cross-env NODE_ENV=development cross-env BABEL_KEEP_MODULES=true rollup -c -w",
