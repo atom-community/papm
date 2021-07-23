@@ -14,6 +14,7 @@ specifiers:
   '@types/glob': ^7.1.4
   '@types/hosted-git-info': ^3.0.2
   '@types/jasmine': ^4.0.0
+  '@types/mri': ^1.1.1
   '@types/mv': 2.1.2
   '@types/ncp': ~2.0.5
   '@types/npm': ^7.19.0
@@ -43,6 +44,7 @@ specifiers:
   hosted-git-info: ^3.0.8
   jasmine-focused: '>=1.0.7 <2.0'
   keytar: ^7.7.0
+  mri: ^1.1.6
   mv: 2.1.1
   ncp: ~2.0.0
   node-downloader-helper: ^2.0.0
@@ -69,6 +71,7 @@ specifiers:
 dependencies:
   '@aminya/underscore-plus': 1.9.0
   '@atom/plist': 0.4.4
+  '@types/mri': 1.1.1
   asar-require: 0.3.0
   async: 3.2.4
   colors: 1.4.0
@@ -78,6 +81,7 @@ dependencies:
   glob: 7.2.3
   hosted-git-info: 3.0.8
   keytar: 7.9.0
+  mri: 1.2.0
   mv: 2.1.1
   ncp: 2.0.0
   node-gyp: 9.0.0
@@ -1899,6 +1903,10 @@ packages:
     dependencies:
       '@types/node': 18.0.0
     dev: true
+
+  /@types/mri/1.1.1:
+    resolution: {integrity: sha512-nJOuiTlsvmClSr3+a/trTSx4DTuY/VURsWGKSf/eeavh0LRMqdsK60ti0TlwM5iHiGOK3/Ibkxsbr7i9rzGreA==}
+    dev: false
 
   /@types/ms/0.7.31:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
@@ -5439,7 +5447,6 @@ packages:
   /mri/1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
     engines: {node: '>=4'}
-    dev: true
 
   /ms/2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
