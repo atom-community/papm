@@ -21,7 +21,7 @@
     "babel": "babel ./lib --out-dir ./lib",
     "copy": "shx cp -r src lib",
     "build": "npm run clean.lib && npm run copy && npm run babel",
-    "prepare": "npm run build",
+    "prepare": "npm run build && husky install",
     "postinstall": "node ./script/download-node.js && shx chmod +x ./bin/npm && shx chmod +x ./bin/apm",
     "get.fixtures": "node ./script/get-fixtures.js && shx cp -r ./spec/fixtures/r.tmbundle-patch/Snippets/ ./spec/fixtures/r.tmbundle/",
     "test": "npm run check-version && npm run build.test && jasmine-focused --captureExceptions dist-spec",
@@ -81,11 +81,19 @@
     "eslint-config-atomic": "^1.16.2",
     "express": "^4.17.1",
     "gitly": "^2.1.2",
+    "husky": "^7.0.0",
     "jasmine-focused": ">=1.0.7 <2.0",
+    "lint-staged": "^11.1.2",
     "node-downloader-helper": "^1.0.18",
     "node-gyp": "^8.0.0",
     "prettier-config-atomic": "^2.1.0",
     "shx": "^0.3.3"
   },
-  "prettier": "prettier-config-atomic"
+  "prettier": "prettier-config-atomic",
+  "lint-staged": {
+    "*.js": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
+  }
 }
