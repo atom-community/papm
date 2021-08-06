@@ -20,6 +20,9 @@ native-module/build
 lib
 dist-spec
 
+# Caches
+.eslintcache
+
 # Downloaded spec
 spec/fixtures/node-v10.20.1.tar.gz
 spec/fixtures/node.lib
