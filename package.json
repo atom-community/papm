@@ -21,7 +21,7 @@
     "babel": "babel ./lib --out-dir ./lib",
     "copy": "shx cp -r src lib",
     "build": "npm run clean.lib && npm run copy && npm run babel",
-    "prepare": "npm run build && husky install",
+    "prepare": "npm run build",
     "postinstall": "node ./script/download-node.js && shx chmod +x ./bin/npm && shx chmod +x ./bin/apm",
     "get.fixtures": "node ./script/get-fixtures.js && shx cp -r ./spec/fixtures/r.tmbundle-patch/Snippets/ ./spec/fixtures/r.tmbundle/",
     "test": "npm run check-version && npm run build.test && jasmine-focused --captureExceptions dist-spec",
