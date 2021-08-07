@@ -140,7 +140,7 @@ Run \`apm help <command>\` to see the more details about a specific command.\
 }
 
 function showHelp(options) {
-  if (options == null) {
+  if (options === null) {
     return
   }
 
@@ -155,9 +155,9 @@ function showHelp(options) {
 
 function printVersions(args, callback) {
   let left, left1
-  const apmVersion = (left = require("../package.json").version) != null ? left : ""
-  const npmVersion = (left1 = require("npm/package.json").version) != null ? left1 : ""
-  const nodeVersion = process.versions.node != null ? process.versions.node : ""
+  const apmVersion = (left = require("../package.json").version) !== null ? left : ""
+  const npmVersion = (left1 = require("npm/package.json").version) !== null ? left1 : ""
+  const nodeVersion = process.versions.node !== null ? process.versions.node : ""
 
   return getPythonVersion((pythonVersion) =>
     git.getGitVersion((gitVersion) =>
@@ -178,13 +178,13 @@ function printVersions(args, callback) {
           }
           console.log(JSON.stringify(versions))
         } else {
-          if (pythonVersion == null) {
+          if (pythonVersion === null) {
             pythonVersion = ""
           }
-          if (gitVersion == null) {
+          if (gitVersion === null) {
             gitVersion = ""
           }
-          if (atomVersion == null) {
+          if (atomVersion === null) {
             atomVersion = ""
           }
           versions = `\
@@ -198,7 +198,7 @@ ${"git".magenta} ${gitVersion.magenta}\
 
           if (config.isWin32()) {
             let left2
-            const visualStudioVersion = (left2 = config.getInstalledVisualStudioFlag()) != null ? left2 : ""
+            const visualStudioVersion = (left2 = config.getInstalledVisualStudioFlag()) !== null ? left2 : ""
             versions += `\n${"visual studio".cyan} ${visualStudioVersion.cyan}`
           }
 
@@ -215,7 +215,7 @@ function getAtomVersion(callback) {
     const unknownVersion = "unknown"
     try {
       let left
-      const { version } = (left = require(path.join(resourcePath, "package.json"))) != null ? left : unknownVersion
+      const { version } = (left = require(path.join(resourcePath, "package.json"))) !== null ? left : unknownVersion
       return callback(version)
     } catch (error) {
       return callback(unknownVersion)
@@ -230,9 +230,9 @@ function getPythonVersion(callback) {
   }
   return npm.load(npmOptions, function () {
     let left
-    let python = (left = npm.config.get("python")) != null ? left : process.env.PYTHON
+    let python = (left = npm.config.get("python")) !== null ? left : process.env.PYTHON
     if (config.isWin32() && !python) {
-      let rootDir = process.env.SystemDrive != null ? process.env.SystemDrive : "C:\\"
+      let rootDir = process.env.SystemDrive !== null ? process.env.SystemDrive : "C:\\"
       if (rootDir[rootDir.length - 1] !== "\\") {
         rootDir += "\\"
       }
@@ -242,7 +242,7 @@ function getPythonVersion(callback) {
       }
     }
 
-    if (python == null) {
+    if (python === null) {
       python = "python"
     }
 
@@ -279,12 +279,12 @@ export default {
         return
       }
       callbackCalled = true
-      if (error != null) {
+      if (error !== null) {
         let message
         if (typeof error === "string") {
           message = error
         } else {
-          message = error.message != null ? error.message : error
+          message = error.message !== null ? error.message : error
         }
 
         if (message === "canceled") {

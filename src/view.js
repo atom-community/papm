@@ -50,7 +50,7 @@ View information about a package/theme in the atom.io registry.\
       }
 
       let latestVersion = null
-      const object = pack.versions != null ? pack.versions : {}
+      const object = pack.versions !== null ? pack.versions : {}
       for (const version in object) {
         const metadata = object[version]
         if (!semver.valid(version)) {
@@ -60,7 +60,7 @@ View information about a package/theme in the atom.io registry.\
           continue
         }
 
-        const engine = metadata.engines?.atom != null ? metadata.engines?.atom : "*"
+        const engine = metadata.engines?.atom !== null ? metadata.engines?.atom : "*"
         if (!semver.validRange(engine)) {
           continue
         }
@@ -68,7 +68,7 @@ View information about a package/theme in the atom.io registry.\
           continue
         }
 
-        if (latestVersion == null) {
+        if (latestVersion === null) {
           latestVersion = version
         }
         if (semver.gt(version, latestVersion)) {
@@ -82,7 +82,7 @@ View information about a package/theme in the atom.io registry.\
 
   getRepository(pack) {
     let repository
-    if ((repository = pack.repository?.url != null ? pack.repository?.url : pack.repository)) {
+    if ((repository = pack.repository?.url !== null ? pack.repository?.url : pack.repository)) {
       return repository.replace(/\.git$/, "")
     }
   }
@@ -93,18 +93,18 @@ View information about a package/theme in the atom.io registry.\
       json: true,
     }
     return request.get(requestSettings, (error, response, body = {}) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else if (response.statusCode === 200) {
         return this.getLatestCompatibleVersion(body, options, function (version) {
           const { name, readme, downloads, stargazers_count } = body
-          const metadata = body.versions?.[version] != null ? body.versions?.[version] : { name }
+          const metadata = body.versions?.[version] !== null ? body.versions?.[version] : { name }
           const pack = { ...metadata, readme, downloads, stargazers_count }
           return callback(null, pack)
         })
       } else {
         let left
-        const message = (left = body.message != null ? body.message : body.error) != null ? left : body
+        const message = (left = body.message !== null ? body.message : body.error) !== null ? left : body
         return callback(`Requesting package failed: ${message}`)
       }
     })
@@ -121,7 +121,7 @@ View information about a package/theme in the atom.io registry.\
     }
 
     return this.getPackage(packageName, options, (error, pack) => {
-      if (error != null) {
+      if (error !== null) {
         callback(error)
         return
       }

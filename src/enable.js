@@ -45,7 +45,7 @@ Enables the named package(s).\
     }
 
     const keyPath = "*.core.disabledPackages"
-    const disabledPackages = (left = _.valueForKeyPath(settings, keyPath)) != null ? left : []
+    const disabledPackages = (left = _.valueForKeyPath(settings, keyPath)) !== null ? left : []
 
     const errorPackages = _.difference(packageNames, disabledPackages)
     if (errorPackages.length > 0) {

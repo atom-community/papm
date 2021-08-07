@@ -131,7 +131,7 @@ have published it.\
   //               argument and true/false as the second argument.
   packageExists(packageName, callback) {
     return Login.getTokenOrLogin(function (error, token) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 
@@ -143,7 +143,7 @@ have published it.\
         },
       }
       return request.get(requestSettings, function (error, response, body = {}) {
-        if (error != null) {
+        if (error !== null) {
           return callback(error)
         } else {
           return callback(null, response.statusCode === 200)
@@ -164,7 +164,7 @@ have published it.\
 
     return this.packageExists(pack.name, (error, exists) => {
       let repository
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
       if (exists) {
@@ -178,7 +178,7 @@ have published it.\
 
       process.stdout.write(`Registering ${pack.name} `)
       return Login.getTokenOrLogin((error, token) => {
-        if (error != null) {
+        if (error !== null) {
           this.logFailure()
           callback(error)
           return
@@ -195,7 +195,7 @@ have published it.\
           },
         }
         return request.post(requestSettings, (error, response, body = {}) => {
-          if (error != null) {
+          if (error !== null) {
             return callback(error)
           } else if (response.statusCode !== 201) {
             const message = request.getErrorMessage(response, body)
@@ -218,7 +218,7 @@ have published it.\
   //            argument.
   createPackageVersion(packageName, tag, options, callback) {
     return Login.getTokenOrLogin(function (error, token) {
-      if (error != null) {
+      if (error !== null) {
         callback(error)
         return
       }
@@ -235,7 +235,7 @@ have published it.\
         },
       }
       return request.post(requestSettings, function (error, response, body = {}) {
-        if (error != null) {
+        if (error !== null) {
           return callback(error)
         } else if (response.statusCode !== 201) {
           const message = request.getErrorMessage(response, body)
@@ -259,14 +259,14 @@ have published it.\
     if (remaining.length >= 2) {
       options = remaining.shift()
     }
-    if (options == null) {
+    if (options === null) {
       options = {}
     }
     const callback = remaining.shift()
 
     process.stdout.write(`Publishing ${options.rename || pack.name}@${tag} `)
     return this.createPackageVersion(pack.name, tag, options, (error) => {
-      if (error != null) {
+      if (error !== null) {
         this.logFailure()
         return callback(error)
       } else {
@@ -320,14 +320,14 @@ have published it.\
     if ((currentBranch = repo.getShortHead())) {
       remoteName = repo.getConfigValue(`branch.${currentBranch}.remote`)
     }
-    if (remoteName == null) {
+    if (remoteName === null) {
       remoteName = repo.getConfigValue("branch.master.remote")
     }
 
     if (remoteName) {
       upstreamUrl = repo.getConfigValue(`remote.${remoteName}.url`)
     }
-    if (upstreamUrl == null) {
+    if (upstreamUrl === null) {
       upstreamUrl = repo.getConfigValue("remote.origin.url")
     }
 
@@ -348,13 +348,13 @@ have published it.\
       const message = `Renaming ${pack.name} to ${name} `
       process.stdout.write(message)
       return this.setPackageName(pack, name, (error) => {
-        if (error != null) {
+        if (error !== null) {
           this.logFailure()
           return callback(error)
         }
 
         return config.getSetting("git", (gitCommand) => {
-          if (gitCommand == null) {
+          if (gitCommand === null) {
             gitCommand = "git"
           }
           return this.spawn(gitCommand, ["add", "package.json"], (code, stderr = "", stdout = "") => {
@@ -408,7 +408,7 @@ have published it.\
       return semverRange === "latest"
     }
 
-    if (pack.engines?.atom != null) {
+    if (pack.engines?.atom !== null) {
       if (!semver.validRange(pack.engines.atom)) {
         throw new Error(`The Atom engine range in the package.json file is invalid: ${pack.engines.atom}`)
       }
@@ -468,34 +468,34 @@ have published it.\
       }
 
       return this.registerPackage(pack, (error, firstTimePublishing) => {
-        if (error != null) {
+        if (error !== null) {
           return callback(error)
         }
 
         return this.renamePackage(pack, rename, (error) => {
-          if (error != null) {
+          if (error !== null) {
             return callback(error)
           }
 
           return this.versionPackage(version, (error, tag) => {
-            if (error != null) {
+            if (error !== null) {
               return callback(error)
             }
 
             return this.pushVersion(tag, pack, (error) => {
-              if (error != null) {
+              if (error !== null) {
                 return callback(error)
               }
 
               return this.waitForTagToBeAvailable(pack, tag, () => {
-                if (originalName != null) {
+                if (originalName !== null) {
                   // If we're renaming a package, we have to hit the API with the
                   // current name, not the new one, or it will 404.
                   rename = pack.name
                   pack.name = originalName
                 }
                 return this.publishPackage(pack, tag, { rename }, (error) => {
-                  if (firstTimePublishing && error == null) {
+                  if (firstTimePublishing && error === null) {
                     this.logFirstTimePublishMessage(pack)
                   }
                   return callback(error)
@@ -507,12 +507,12 @@ have published it.\
       })
     } else if (tag?.length > 0) {
       return this.registerPackage(pack, (error, firstTimePublishing) => {
-        if (error != null) {
+        if (error !== null) {
           return callback(error)
         }
 
         return this.publishPackage(pack, tag, (error) => {
-          if (firstTimePublishing && error == null) {
+          if (firstTimePublishing && error === null) {
             this.logFirstTimePublishMessage(pack)
           }
           return callback(error)

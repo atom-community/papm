@@ -11,12 +11,12 @@ export function tree(items, options = {}, callback) {
     callback = options
     options = {}
   }
-  if (callback == null) {
+  if (callback === null) {
     callback = (item) => item
   }
 
   if (items.length === 0) {
-    const emptyMessage = options.emptyMessage != null ? options.emptyMessage : "(empty)"
+    const emptyMessage = options.emptyMessage !== null ? options.emptyMessage : "(empty)"
     return console.log(`\u2514\u2500\u2500 ${emptyMessage}`)
   } else {
     return (() => {

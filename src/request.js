@@ -20,20 +20,20 @@ function loadNpm(callback) {
 function configureRequest(requestOptions, callback) {
   return loadNpm(function () {
     let left
-    if (requestOptions.proxy == null) {
+    if (requestOptions.proxy === null) {
       requestOptions.proxy =
         npm.config.get("https-proxy") || npm.config.get("proxy") || process.env.HTTPS_PROXY || process.env.HTTP_PROXY
     }
-    if (requestOptions.strictSSL == null) {
+    if (requestOptions.strictSSL === null) {
       requestOptions.strictSSL = npm.config.get("strict-ssl")
     }
 
     const userAgent =
-      (left = npm.config.get("user-agent")) != null ? left : `AtomApm/${require("../package.json").version}`
-    if (requestOptions.headers == null) {
+      (left = npm.config.get("user-agent")) !== null ? left : `AtomApm/${require("../package.json").version}`
+    if (requestOptions.headers === null) {
       requestOptions.headers = {}
     }
-    if (requestOptions.headers["User-Agent"] == null) {
+    if (requestOptions.headers["User-Agent"] === null) {
       requestOptions.headers["User-Agent"] = userAgent
     }
     return callback()
@@ -42,7 +42,7 @@ function configureRequest(requestOptions, callback) {
 
 export function get(requestOptions, callback) {
   return configureRequest(requestOptions, function () {
-    let retryCount = requestOptions.retries != null ? requestOptions.retries : 0
+    let retryCount = requestOptions.retries !== null ? requestOptions.retries : 0
     let requestsMade = 0
     var tryRequest = function () {
       requestsMade++
@@ -80,7 +80,7 @@ export function getErrorMessage(response, body) {
     return "atom.io is temporarily unavailable, please try again later."
   } else {
     let left
-    return (left = body?.message != null ? body?.message : body?.error) != null ? left : body
+    return (left = body?.message !== null ? body?.message : body?.error) !== null ? left : body
   }
 }
 

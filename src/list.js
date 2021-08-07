@@ -25,7 +25,7 @@ export default class List extends Command {
         this.disabledPackages = CSON.readFileSync(configPath)?.["*"]?.core?.disabledPackages
       } catch (error) {}
     }
-    if (this.disabledPackages == null) {
+    if (this.disabledPackages === null) {
       this.disabledPackages = []
     }
   }
@@ -71,7 +71,7 @@ List all the installed packages and also the packages bundled with Atom.\
         const result = []
         for (const pack of packages) {
           let packageLine = pack.name
-          if (pack.version != null && options.argv.versions) {
+          if (pack.version !== null && options.argv.versions) {
             packageLine += `@${pack.version}`
           }
           result.push(console.log(packageLine))
@@ -81,13 +81,13 @@ List all the installed packages and also the packages bundled with Atom.\
     } else {
       tree(packages, (pack) => {
         let packageLine = pack.name
-        if (pack.version != null && options.argv.versions) {
+        if (pack.version !== null && options.argv.versions) {
           packageLine += `@${pack.version}`
         }
         if (pack.apmInstallSource?.type === "git") {
           const repo = getRepository(pack)
           let shaLine = `#${pack.apmInstallSource.sha.substr(0, 8)}`
-          if (repo != null) {
+          if (repo !== null) {
             shaLine = repo + shaLine
           }
           packageLine += ` (${shaLine})`.grey
@@ -140,7 +140,7 @@ List all the installed packages and also the packages bundled with Atom.\
           manifest = CSON.readFileSync(manifestPath)
         } catch (error) {}
       }
-      if (manifest == null) {
+      if (manifest === null) {
         manifest = {}
       }
       manifest.name = child
@@ -196,7 +196,7 @@ List all the installed packages and also the packages bundled with Atom.\
         const metadataPath = path.join(resourcePath, "package.json")
         ;({ _atomPackages } = JSON.parse(fs.readFileSync(metadataPath)))
       } catch (error) {}
-      if (_atomPackages == null) {
+      if (_atomPackages === null) {
         _atomPackages = {}
       }
       let packages = (() => {

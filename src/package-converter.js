@@ -75,7 +75,7 @@ export default class PackageConverter {
     try {
       packageName = JSON.parse(fs.readFileSync(path.join(sourcePath, "package.json")))?.packageName
     } catch (error) {}
-    if (packageName == null) {
+    if (packageName === null) {
       packageName = path.basename(this.destinationPath)
     }
 
@@ -187,7 +187,7 @@ export default class PackageConverter {
     const destination = path.join(this.destinationPath, "snippets")
     for (const child of fs.readdirSync(sourceSnippets)) {
       var left, selector
-      const snippet = (left = this.readFileSync(path.join(sourceSnippets, child))) != null ? left : {}
+      const snippet = (left = this.readFileSync(path.join(sourceSnippets, child))) !== null ? left : {}
       let { scope, name, content, tabTrigger } = snippet
       if (!tabTrigger || !content) {
         continue
@@ -203,7 +203,7 @@ export default class PackageConverter {
       // Unescape escaped dollar signs $
       content = content.replace(/\\\$/g, "$")
 
-      if (name == null) {
+      if (name === null) {
         const extension = path.extname(child)
         name = path.basename(child, extension)
       }
@@ -216,11 +216,11 @@ export default class PackageConverter {
         e.message = `In file ${e.fileName} at ${JSON.stringify(scope)}: ${e.message}`
         throw e
       }
-      if (selector == null) {
+      if (selector === null) {
         selector = "*"
       }
 
-      if (snippetsBySelector[selector] == null) {
+      if (snippetsBySelector[selector] === null) {
         snippetsBySelector[selector] = {}
       }
       snippetsBySelector[selector][name] = { prefix: tabTrigger, body: content }
@@ -243,7 +243,7 @@ export default class PackageConverter {
     const destination = path.join(this.destinationPath, "settings")
     for (const child of fs.readdirSync(sourcePreferences)) {
       var left, properties
-      const { scope, settings } = (left = this.readFileSync(path.join(sourcePreferences, child))) != null ? left : {}
+      const { scope, settings } = (left = this.readFileSync(path.join(sourcePreferences, child))) !== null ? left : {}
       if (!scope || !settings) {
         continue
       }
@@ -258,10 +258,10 @@ export default class PackageConverter {
         }
         for (const key in properties) {
           const value = properties[key]
-          if (preferencesBySelector[selector] == null) {
+          if (preferencesBySelector[selector] === null) {
             preferencesBySelector[selector] = {}
           }
-          if (preferencesBySelector[selector][key] != null) {
+          if (preferencesBySelector[selector][key] !== null) {
             preferencesBySelector[selector][key] = { ...value, ...preferencesBySelector[selector][key] }
           } else {
             preferencesBySelector[selector][key] = value

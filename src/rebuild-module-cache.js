@@ -48,7 +48,7 @@ This command skips all linked packages.\
   rebuild(packageDirectory, callback) {
     return this.getResourcePath((resourcePath) => {
       try {
-        if (this.moduleCache == null) {
+        if (this.moduleCache === null) {
           this.moduleCache = require(path.join(resourcePath, "src", "module-cache"))
         }
         this.moduleCache.create(packageDirectory)
@@ -76,7 +76,7 @@ This command skips all linked packages.\
       return commands.push((callback) => {
         process.stdout.write(`Rebuilding ${packageName} module cache `)
         return this.rebuild(packageDirectory, (error) => {
-          if (error != null) {
+          if (error !== null) {
             this.logFailure()
           } else {
             this.logSuccess()

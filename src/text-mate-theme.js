@@ -18,8 +18,8 @@ export default class TextMateTheme {
 
   buildRulesets() {
     let left, variableSettings
-    let { settings } = (left = plist.parseStringSync(this.contents)) != null ? left : {}
-    if (settings == null) {
+    let { settings } = (left = plist.parseStringSync(this.contents)) !== null ? left : {}
+    if (settings === null) {
       settings = []
     }
 
@@ -38,7 +38,7 @@ export default class TextMateTheme {
       }
     }
 
-    if (variableSettings == null) {
+    if (variableSettings === null) {
       throw new Error(`\
 Could not find the required color settings in the theme.
 

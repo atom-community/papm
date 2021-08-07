@@ -15,7 +15,7 @@ import url from "url"
 // Returns a name/owner string or null if not parseable.
 export function getRepository(pack = {}) {
   let repository
-  if ((repository = pack.repository?.url != null ? pack.repository?.url : pack.repository)) {
+  if ((repository = pack.repository?.url !== null ? pack.repository?.url : pack.repository)) {
     const repoPath = url.parse(repository.replace(/\.git$/, "")).pathname
     const [name, owner] = Array.from(repoPath.split("/").slice(-2))
     if (name && owner) {

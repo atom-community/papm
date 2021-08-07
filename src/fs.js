@@ -29,7 +29,7 @@ const fsAdditions = {
 
   cp(sourcePath, destinationPath, callback) {
     return rm(destinationPath, function (error) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else {
         return ncp(sourcePath, destinationPath, callback)
@@ -39,7 +39,7 @@ const fsAdditions = {
 
   mv(sourcePath, destinationPath, callback) {
     return rm(destinationPath, function (error) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else {
         wrench.mkdirSyncRecursive(path.dirname(destinationPath), 0o755)

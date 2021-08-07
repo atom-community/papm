@@ -45,7 +45,7 @@ Run \`apm stars\` to see all your starred packages.\
       },
     }
     return request.post(requestSettings, (error, response, body = {}) => {
-      if (error != null) {
+      if (error !== null) {
         this.logFailure()
         return callback(error)
       } else if (response.statusCode === 404 && ignoreUnpublishedPackages) {
@@ -74,7 +74,7 @@ Run \`apm stars\` to see all your starred packages.\
       if ((manifestPath = CSON.resolve(path.join(userPackagesDirectory, child, "package")))) {
         try {
           var left
-          const metadata = (left = CSON.readFileSync(manifestPath)) != null ? left : {}
+          const metadata = (left = CSON.readFileSync(manifestPath)) !== null ? left : {}
           if (metadata.name && Packages.getRepository(metadata)) {
             installedPackages.push(metadata.name)
           }
@@ -105,7 +105,7 @@ Run \`apm stars\` to see all your starred packages.\
     }
 
     return Login.getTokenOrLogin((error, token) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 

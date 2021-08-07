@@ -8,4 +8,4 @@ import apm from "./apm-cli"
 
 process.title = "apm"
 
-apm.run(process.argv.slice(2), (error) => (process.exitCode = error != null ? 1 : 0))
+apm.run(process.argv.slice(2), (error) => (process.exitCode = error !== null ? 1 : 0))

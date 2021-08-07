@@ -44,7 +44,7 @@ List or install starred Atom packages and themes.\
     } else {
       requestSettings.url = `${config.getAtomApiUrl()}/stars`
       return Login.getTokenOrLogin((error, token) => {
-        if (error != null) {
+        if (error !== null) {
           return callback(error)
         }
 
@@ -56,10 +56,10 @@ List or install starred Atom packages and themes.\
 
   requestStarredPackages(requestSettings, callback) {
     return request.get(requestSettings, function (error, response, body = []) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else if (response.statusCode === 200) {
-        let packages = body.filter((pack) => pack?.releases?.latest != null)
+        let packages = body.filter((pack) => pack?.releases?.latest !== null)
         packages = packages.map(({ readme, metadata, downloads, stargazers_count }) => ({
           ...metadata,
           readme,
@@ -91,7 +91,7 @@ List or install starred Atom packages and themes.\
 
   logPackagesAsText(user, packagesAreThemes, packages, callback) {
     let label
-    const userLabel = user != null ? user : "you"
+    const userLabel = user !== null ? user : "you"
     if (packagesAreThemes) {
       label = `Themes starred by ${userLabel}`
     } else {
@@ -129,7 +129,7 @@ List or install starred Atom packages and themes.\
     const user = options.argv.user?.toString().trim()
 
     return this.getStarredPackages(user, options.argv.compatible, (error, packages) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 

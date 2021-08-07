@@ -83,7 +83,7 @@ Run \`apm links\` to view all the currently linked packages.\
 
   unlinkPackage(options, callback) {
     let error, left, packageName
-    const packagePath = (left = options.argv._[0]?.toString()) != null ? left : "."
+    const packagePath = (left = options.argv._[0]?.toString()) !== null ? left : "."
     const linkPath = path.resolve(process.cwd(), packagePath)
 
     try {

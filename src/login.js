@@ -23,7 +23,7 @@ export default class Login extends Command {
 
   static getTokenOrLogin(callback) {
     return auth.getToken(function (error, token) {
-      if (error != null) {
+      if (error !== null) {
         return new Login().run({ callback, commandArgs: [] })
       } else {
         return callback(null, token)

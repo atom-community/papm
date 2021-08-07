@@ -39,13 +39,13 @@ Run \`apm stars\` to see all your starred packages.\
       },
     }
     return request.del(requestSettings, (error, response, body = {}) => {
-      if (error != null) {
+      if (error !== null) {
         this.logFailure()
         return callback(error)
       } else if (response.statusCode !== 204) {
         let left
         this.logFailure()
-        const message = (left = body.message != null ? body.message : body.error) != null ? left : body
+        const message = (left = body.message !== null ? body.message : body.error) !== null ? left : body
         return callback(`Unstarring package failed: ${message}`)
       } else {
         this.logSuccess()
@@ -65,7 +65,7 @@ Run \`apm stars\` to see all your starred packages.\
     }
 
     return Login.getTokenOrLogin((error, token) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 

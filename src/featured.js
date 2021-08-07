@@ -47,10 +47,10 @@ atom.io registry.\
     }
 
     return request.get(requestSettings, function (error, response, body = []) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else if (response.statusCode === 200) {
-        let packages = body.filter((pack) => pack?.releases?.latest != null)
+        let packages = body.filter((pack) => pack?.releases?.latest !== null)
         packages = packages.map(({ readme, metadata, downloads, stargazers_count }) => ({
           ...metadata,
           readme,
@@ -68,12 +68,12 @@ atom.io registry.\
 
   getAllFeaturedPackages(atomVersion, callback) {
     return this.getFeaturedPackagesByType(atomVersion, "packages", (error, packages) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 
       return this.getFeaturedPackagesByType(atomVersion, "themes", function (error, themes) {
-        if (error != null) {
+        if (error !== null) {
           return callback(error)
         }
         return callback(null, packages.concat(themes))
@@ -86,7 +86,7 @@ atom.io registry.\
     options = this.parseOptions(options.commandArgs)
 
     const listCallback = function (error, packages) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 

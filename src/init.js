@@ -82,9 +82,9 @@ on the option selected.\
       templatePath = this.getTemplatePath(options.argv, "language")
       this.generateFromTemplate(languagePath, templatePath, languageName)
       return callback()
-    } else if (options.argv.package != null) {
+    } else if (options.argv.package !== null) {
       return callback("You must specify a path after the --package argument")
-    } else if (options.argv.theme != null) {
+    } else if (options.argv.theme !== null) {
       return callback("You must specify a path after the --theme argument")
     } else {
       return callback("You must specify either --package, --theme or --language to `apm init`")
@@ -100,7 +100,7 @@ on the option selected.\
     const PackageConverter = require("./package-converter")
     const converter = new PackageConverter(sourcePath, destinationPath)
     return converter.convert((error) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else {
         destinationPath = path.resolve(destinationPath)
@@ -120,7 +120,7 @@ on the option selected.\
     const ThemeConverter = require("./theme-converter")
     const converter = new ThemeConverter(sourcePath, destinationPath)
     return converter.convert((error) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else {
         destinationPath = path.resolve(destinationPath)
@@ -134,7 +134,7 @@ on the option selected.\
   }
 
   generateFromTemplate(packagePath, templatePath, packageName) {
-    if (packageName == null) {
+    if (packageName === null) {
       packageName = path.basename(packagePath)
     }
     const packageAuthor = process.env.GITHUB_USER || "atom"
@@ -198,7 +198,7 @@ on the option selected.\
   }
 
   getTemplatePath(argv, templateType) {
-    if (argv.template != null) {
+    if (argv.template !== null) {
       return path.resolve(argv.template)
     } else {
       return path.resolve(__dirname, "..", "templates", templateType)

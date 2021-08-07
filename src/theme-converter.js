@@ -22,7 +22,7 @@ export default class ThemeConverter {
     if (protocol === "http:" || protocol === "https:") {
       const requestOptions = { url: this.sourcePath }
       return request.get(requestOptions, (error, response, body) => {
-        if (error != null) {
+        if (error !== null) {
           if (error.code === "ENOTFOUND") {
             error = `Could not resolve URL: ${this.sourcePath}`
           }
@@ -46,7 +46,7 @@ export default class ThemeConverter {
   convert(callback) {
     return this.readTheme((error, themeContents) => {
       let theme
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 

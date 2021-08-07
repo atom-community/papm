@@ -9,9 +9,9 @@ import semver from "semver"
 let deprecatedPackages = null
 
 export function isDeprecatedPackage(name, version) {
-  if (deprecatedPackages == null) {
+  if (deprecatedPackages === null) {
     let left
-    deprecatedPackages = (left = require("../deprecated-packages")) != null ? left : {}
+    deprecatedPackages = (left = require("../deprecated-packages")) !== null ? left : {}
   }
   if (!deprecatedPackages.hasOwnProperty(name)) {
     return false

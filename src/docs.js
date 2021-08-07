@@ -38,7 +38,7 @@ Open a package's homepage in the default browser.\
 
     return this.getPackage(packageName, options, (error, pack) => {
       let repository
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 

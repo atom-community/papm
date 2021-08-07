@@ -33,7 +33,7 @@ Run \`apm links\` to view all the currently linked packages.\
     const { callback } = options
     options = this.parseOptions(options.commandArgs)
 
-    const packagePath = (left = options.argv._[0]?.toString()) != null ? left : "."
+    const packagePath = (left = options.argv._[0]?.toString()) !== null ? left : "."
     const linkPath = path.resolve(process.cwd(), packagePath)
 
     let packageName = options.argv.name

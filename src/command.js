@@ -122,7 +122,7 @@ export default class Command {
       let electronVersion
       try {
         let left, version
-        ;({ version, electronVersion } = (left = require(path.join(resourcePath, "package.json"))) != null ? left : {})
+        ;({ version, electronVersion } = (left = require(path.join(resourcePath, "package.json"))) !== null ? left : {})
         version = this.normalizeVersion(version)
         if (semver.valid(version)) {
           this.installedAtomVersion = version
@@ -130,8 +130,8 @@ export default class Command {
       } catch (error) {}
 
       this.electronVersion =
-        process.env.ATOM_ELECTRON_VERSION != null ? process.env.ATOM_ELECTRON_VERSION : electronVersion
-      if (this.electronVersion == null) {
+        process.env.ATOM_ELECTRON_VERSION !== null ? process.env.ATOM_ELECTRON_VERSION : electronVersion
+      if (this.electronVersion === null) {
         throw new Error("Could not determine Electron version")
       }
 
@@ -191,28 +191,28 @@ export default class Command {
     let left
     const httpProxy = this.npm.config.get("proxy")
     if (httpProxy) {
-      if (env.HTTP_PROXY == null) {
+      if (env.HTTP_PROXY === null) {
         env.HTTP_PROXY = httpProxy
       }
-      if (env.http_proxy == null) {
+      if (env.http_proxy === null) {
         env.http_proxy = httpProxy
       }
     }
 
     const httpsProxy = this.npm.config.get("https-proxy")
     if (httpsProxy) {
-      if (env.HTTPS_PROXY == null) {
+      if (env.HTTPS_PROXY === null) {
         env.HTTPS_PROXY = httpsProxy
       }
-      if (env.https_proxy == null) {
+      if (env.https_proxy === null) {
         env.https_proxy = httpsProxy
       }
 
       // node-gyp only checks HTTP_PROXY (as of node-gyp@4.0.0)
-      if (env.HTTP_PROXY == null) {
+      if (env.HTTP_PROXY === null) {
         env.HTTP_PROXY = httpsProxy
       }
-      if (env.http_proxy == null) {
+      if (env.http_proxy === null) {
         env.http_proxy = httpsProxy
       }
     }
@@ -220,7 +220,7 @@ export default class Command {
     // node-gyp doesn't currently have an option for this so just set the
     // environment variable to bypass strict SSL
     // https://github.com/nodejs/node-gyp/issues/448
-    const useStrictSsl = (left = this.npm.config.get("strict-ssl")) != null ? left : true
+    const useStrictSsl = (left = this.npm.config.get("strict-ssl")) !== null ? left : true
     if (!useStrictSsl) {
       return (env.NODE_TLS_REJECT_UNAUTHORIZED = 0)
     }

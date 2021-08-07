@@ -42,7 +42,7 @@ name is specified.\
     process.stdout.write(`Unpublishing ${packageLabel} `)
 
     return auth.getToken((error, token) => {
-      if (error != null) {
+      if (error !== null) {
         this.logFailure()
         callback(error)
         return
@@ -61,13 +61,13 @@ name is specified.\
       }
 
       return request.del(options, (error, response, body = {}) => {
-        if (error != null) {
+        if (error !== null) {
           this.logFailure()
           return callback(error)
         } else if (response.statusCode !== 204) {
           let left
           this.logFailure()
-          const message = (left = body.message != null ? body.message : body.error) != null ? left : body
+          const message = (left = body.message !== null ? body.message : body.error) !== null ? left : body
           return callback(`Unpublishing failed: ${message}`)
         } else {
           this.logSuccess()

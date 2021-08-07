@@ -69,7 +69,7 @@ package names to install with optional versions using the
 
   installModule(options, pack, moduleURI, callback) {
     let installDirectory, nodeModulesDirectory
-    const installGlobally = options.installGlobally != null ? options.installGlobally : true
+    const installGlobally = options.installGlobally !== null ? options.installGlobally : true
 
     const installArgs = [
       "--globalconfig",
@@ -128,7 +128,7 @@ package names to install with optional versions using the
           commands.push((next) => this.warmCompileCache(pack.name, next))
 
           return async.waterfall(commands, (error) => {
-            if (error != null) {
+            if (error !== null) {
               this.logFailure()
             } else {
               if (!options.argv.json) {
@@ -252,7 +252,7 @@ Run apm -v after installing Git to see what version has been detected.\
     }
     return request.get(requestSettings, function (error, response, body = {}) {
       let message
-      if (error != null) {
+      if (error !== null) {
         message = `Request for package information failed: ${error.message}`
         if (error.code) {
           message += ` (${error.code})`
@@ -279,7 +279,7 @@ Run apm -v after installing Git to see what version has been detected.\
     try {
       let left
       const { version } =
-        (left = CSON.readFileSync(CSON.resolve(path.join("node_modules", packageName, "package")))) != null ? left : {}
+        (left = CSON.readFileSync(CSON.resolve(path.join("node_modules", packageName, "package")))) !== null ? left : {}
       return packageVersion === version
     } catch (error) {
       return false
@@ -298,7 +298,7 @@ Run apm -v after installing Git to see what version has been detected.\
     const packageName = metadata.name
     let packageVersion = metadata.version
 
-    const installGlobally = options.installGlobally != null ? options.installGlobally : true
+    const installGlobally = options.installGlobally !== null ? options.installGlobally : true
     if (!installGlobally) {
       if (packageVersion && this.isPackageInstalled(packageName, packageVersion)) {
         callback(null, {})
@@ -318,11 +318,11 @@ Run apm -v after installing Git to see what version has been detected.\
     }
 
     return this.requestPackage(packageName, (error, pack) => {
-      if (error != null) {
+      if (error !== null) {
         this.logFailure()
         return callback(error)
       } else {
-        if (packageVersion == null) {
+        if (packageVersion === null) {
           packageVersion = this.getLatestCompatibleVersion(pack)
         }
         if (!packageVersion) {
@@ -331,7 +331,7 @@ Run apm -v after installing Git to see what version has been detected.\
           return
         }
 
-        const { tarball } = pack.versions[packageVersion]?.dist != null ? pack.versions[packageVersion]?.dist : {}
+        const { tarball } = pack.versions[packageVersion]?.dist !== null ? pack.versions[packageVersion]?.dist : {}
         if (!tarball) {
           this.logFailure()
           callback(`Package version: ${packageVersion} not found`)
@@ -348,7 +348,7 @@ Run apm -v after installing Git to see what version has been detected.\
           })
         }
         commands.push(function ({ installPath }, next) {
-          if (installPath != null) {
+          if (installPath !== null) {
             metadata = JSON.parse(fs.readFileSync(path.join(installPath, "package.json"), "utf8"))
             const json = { installPath, metadata }
             return next(null, json)
@@ -359,7 +359,7 @@ Run apm -v after installing Git to see what version has been detected.\
 
         return async.waterfall(commands, (error, json) => {
           if (!installGlobally) {
-            if (error != null) {
+            if (error !== null) {
               this.logFailure()
             } else {
               if (!options.argv.json) {
@@ -388,7 +388,7 @@ Run apm -v after installing Git to see what version has been detected.\
         return this.installModule(options, { name: packageName }, packagePath, next)
       })
       commands.push(function ({ installPath }, next) {
-        if (installPath != null) {
+        if (installPath !== null) {
           const metadata = JSON.parse(fs.readFileSync(path.join(installPath, "package.json"), "utf8"))
           const json = { installPath, metadata }
           return next(null, json)
@@ -398,7 +398,7 @@ Run apm -v after installing Git to see what version has been detected.\
       }) // installed locally, no install path data
 
       return async.waterfall(commands, (error, json) => {
-        if (error != null) {
+        if (error !== null) {
           this.logFailure()
         } else {
           if (!options.argv.json) {
@@ -449,7 +449,7 @@ Run apm -v after installing Git to see what version has been detected.\
     try {
       let left
       const metadata = fs.readFileSync("package.json", "utf8")
-      const { packageDependencies, dependencies } = (left = JSON.parse(metadata)) != null ? left : {}
+      const { packageDependencies, dependencies } = (left = JSON.parse(metadata)) !== null ? left : {}
 
       if (!packageDependencies) {
         return {}
@@ -592,7 +592,7 @@ Run apm -v after installing Git to see what version has been detected.\
     }
 
     let latestVersion = null
-    const object = pack.versions != null ? pack.versions : {}
+    const object = pack.versions !== null ? pack.versions : {}
     for (const version in object) {
       const metadata = object[version]
       if (!semver.valid(version)) {
@@ -605,7 +605,7 @@ Run apm -v after installing Git to see what version has been detected.\
         continue
       }
 
-      const engine = metadata.engines?.atom != null ? metadata.engines?.atom : "*"
+      const engine = metadata.engines?.atom !== null ? metadata.engines?.atom : "*"
       if (!semver.validRange(engine)) {
         continue
       }
@@ -613,7 +613,7 @@ Run apm -v after installing Git to see what version has been detected.\
         continue
       }
 
-      if (latestVersion == null) {
+      if (latestVersion === null) {
         latestVersion = version
       }
       if (semver.gt(version, latestVersion)) {

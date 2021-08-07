@@ -82,7 +82,7 @@ export function getGitVersion(callback) {
   }
   return npm.load(npmOptions, function () {
     let left
-    const git = (left = npm.config.get("git")) != null ? left : "git"
+    const git = (left = npm.config.get("git")) !== null ? left : "git"
     addGitToEnv(process.env)
     const spawned = spawn(git, ["--version"])
     const outputChunks = []

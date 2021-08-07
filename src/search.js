@@ -44,10 +44,10 @@ Search for Atom packages/themes on the atom.io registry.\
     }
 
     return request.get(requestSettings, function (error, response, body = {}) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       } else if (response.statusCode === 200) {
-        let packages = body.filter((pack) => pack.releases?.latest != null)
+        let packages = body.filter((pack) => pack.releases?.latest !== null)
         packages = packages.map(({ readme, metadata, downloads, stargazers_count }) => ({
           ...metadata,
           readme,
@@ -79,7 +79,7 @@ Search for Atom packages/themes on the atom.io registry.\
     }
 
     return this.searchPackages(query, searchOptions, function (error, packages) {
-      if (error != null) {
+      if (error !== null) {
         callback(error)
         return
       }

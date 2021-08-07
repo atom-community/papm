@@ -50,7 +50,7 @@ cmd-shift-o to run the package out of the newly cloned repository.\
       json: true,
     }
     return request.get(requestSettings, function (error, response, body = {}) {
-      if (error != null) {
+      if (error !== null) {
         return callback(`Request for package information failed: ${error.message}`)
       } else if (response.statusCode === 200) {
         let repositoryUrl
@@ -68,7 +68,7 @@ cmd-shift-o to run the package out of the newly cloned repository.\
 
   cloneRepository(repoUrl, packageDirectory, options, callback = function () {}) {
     return config.getSetting("git", (command) => {
-      if (command == null) {
+      if (command === null) {
         command = "git"
       }
       const args = ["clone", "--recursive", repoUrl, packageDirectory]
@@ -112,14 +112,14 @@ cmd-shift-o to run the package out of the newly cloned repository.\
     }
 
     let packageDirectory =
-      (left = options.commandArgs.shift()) != null ? left : path.join(config.getReposDirectory(), packageName)
+      (left = options.commandArgs.shift()) !== null ? left : path.join(config.getReposDirectory(), packageName)
     packageDirectory = path.resolve(packageDirectory)
 
     if (fs.existsSync(packageDirectory)) {
       return this.linkPackage(packageDirectory, options)
     } else {
       return this.getRepositoryUrl(packageName, (error, repoUrl) => {
-        if (error != null) {
+        if (error !== null) {
           return options.callback(error)
         } else {
           const tasks = []

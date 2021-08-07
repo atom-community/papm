@@ -87,7 +87,7 @@ Disables the named package(s).\
       }
 
       const keyPath = "*.core.disabledPackages"
-      const disabledPackages = (left = _.valueForKeyPath(settings, keyPath)) != null ? left : []
+      const disabledPackages = (left = _.valueForKeyPath(settings, keyPath)) !== null ? left : []
       const result = _.union(disabledPackages, packageNames)
       _.setValueForKeyPath(settings, keyPath, result)
 

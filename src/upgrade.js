@@ -107,19 +107,19 @@ available updates.\
       json: true,
     }
     return request.get(requestSettings, (error, response, body = {}) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(`Request for package information failed: ${error.message}`)
       } else if (response.statusCode === 404) {
         return callback()
       } else if (response.statusCode !== 200) {
         let left
-        const message = (left = body.message != null ? body.message : body.error) != null ? left : body
+        const message = (left = body.message !== null ? body.message : body.error) !== null ? left : body
         return callback(`Request for package information failed: ${message}`)
       } else {
         let version
         const atomVersion = this.installedAtomVersion
         let latestVersion = pack.version
-        const object = body.versions != null ? body.versions : {}
+        const object = body.versions !== null ? body.versions : {}
         for (version in object) {
           const metadata = object[version]
           if (!semver.valid(version)) {
@@ -129,7 +129,7 @@ available updates.\
             continue
           }
 
-          const engine = metadata.engines?.atom != null ? metadata.engines?.atom : "*"
+          const engine = metadata.engines?.atom !== null ? metadata.engines?.atom : "*"
           if (!semver.validRange(engine)) {
             continue
           }
@@ -154,7 +154,7 @@ available updates.\
   getLatestSha(pack, callback) {
     const repoPath = path.join(this.atomPackagesDirectory, pack.name)
     return config.getSetting("git", (command) => {
-      if (command == null) {
+      if (command === null) {
         command = "git"
       }
       const args = ["fetch", "origin", "master"]
@@ -175,7 +175,7 @@ available updates.\
   }
 
   hasRepo(pack) {
-    return Packages.getRepository(pack) != null
+    return Packages.getRepository(pack) !== null
   }
 
   getAvailableUpdates(packages, callback) {
@@ -188,11 +188,11 @@ available updates.\
     }
 
     return async.mapLimit(packages, 10, getLatestVersionOrSha, function (error, updates) {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 
-      updates = updates.filter((update) => update.latestVersion != null || update.sha != null)
+      updates = updates.filter((update) => update.latestVersion !== null || update.sha !== null)
       updates.sort((updateA, updateB) => updateA.pack.name.localeCompare(updateB.pack.name))
 
       return callback(null, updates)
@@ -251,7 +251,7 @@ available updates.\
   upgradePackages(options, callback) {
     const packages = this.getInstalledPackages(options)
     return this.getAvailableUpdates(packages, (error, updates) => {
-      if (error != null) {
+      if (error !== null) {
         return callback(error)
       }
 
@@ -271,7 +271,7 @@ available updates.\
         tree(updates, function ({ pack, latestVersion, sha }) {
           let { name, apmInstallSource, version } = pack
           name = name.yellow
-          if (sha != null) {
+          if (sha !== null) {
             version = apmInstallSource.sha.substr(0, 8).red
             latestVersion = sha.substr(0, 8).green
           } else {
@@ -296,7 +296,7 @@ available updates.\
       console.log()
       if (options.argv.confirm) {
         return this.promptForConfirmation((error, confirmed) => {
-          if (error != null) {
+          if (error !== null) {
             return callback(error)
           }
 
