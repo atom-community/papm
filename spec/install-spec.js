@@ -559,7 +559,7 @@ describe("apm install", function () {
     })
 
     describe("when installing a Git URL and --json is specified", function () {
-      let [cloneUrl, pkgJsonPath] = Array.from([])
+      let [cloneUrl] = Array.from([])
 
       beforeEach(function () {
         const callback = jasmine.createSpy("callback")

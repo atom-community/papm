@@ -141,7 +141,7 @@ have published it.\
           authorization: token,
         },
       }
-      return request.get(requestSettings, function (error, response, body = {}) {
+      return request.get(requestSettings, function (error, response) {
         if (error !== null) {
           return callback(error)
         } else {
@@ -292,8 +292,7 @@ have published it.\
     }
 
     try {
-      let pack
-      return (pack = JSON.parse(fs.readFileSync(metadataPath)))
+      return JSON.parse(fs.readFileSync(metadataPath))
     } catch (error) {
       throw new Error(`Error parsing package.json file: ${error.message}`)
     }
