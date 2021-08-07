@@ -5,7 +5,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import url from "url"
 
 // Package helpers
 // Parse the repository in `name/owner` format from the package metadata.
@@ -16,7 +15,7 @@ import url from "url"
 export function getRepository(pack = {}) {
   let repository
   if ((repository = pack.repository?.url !== null ? pack.repository?.url : pack.repository)) {
-    const repoPath = url.parse(repository.replace(/\.git$/, "")).pathname
+    const repoPath = new URL(repository.replace(/\.git$/, "")).pathname
     const [name, owner] = Array.from(repoPath.split("/").slice(-2))
     if (name && owner) {
       return `${name}/${owner}`

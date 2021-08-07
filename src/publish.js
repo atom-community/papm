@@ -6,7 +6,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import path from "path"
-import url from "url"
 import yargs from "yargs"
 import Git from "git-utils"
 import semver from "semver"
@@ -400,7 +399,7 @@ have published it.\
       }
 
       try {
-        if (url.parse(semverRange).protocol.length > 0) {
+        if (new URL(semverRange).protocol.length > 0) {
           return true
         }
       } catch (error) {}

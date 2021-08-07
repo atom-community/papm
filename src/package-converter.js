@@ -7,7 +7,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import path from "path"
-import url from "url"
 import zlib from "zlib"
 import * as _ from "@aminya/underscore-plus"
 import CSON from "season"
@@ -34,7 +33,7 @@ export default class PackageConverter {
   }
 
   convert(callback) {
-    const { protocol } = url.parse(this.sourcePath)
+    const { protocol } = new URL(this.sourcePath)
     if (protocol === "http:" || protocol === "https:") {
       return this.downloadBundle(callback)
     } else {

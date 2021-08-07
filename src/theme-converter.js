@@ -5,7 +5,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import path from "path"
-import url from "url"
 import fs from "./fs"
 import * as request from "./request"
 import TextMateTheme from "./text-mate-theme"
@@ -18,7 +17,7 @@ export default class ThemeConverter {
   }
 
   readTheme(callback) {
-    const { protocol } = url.parse(this.sourcePath)
+    const { protocol } = new URL(this.sourcePath)
     if (protocol === "http:" || protocol === "https:") {
       const requestOptions = { url: this.sourcePath }
       return request.get(requestOptions, (error, response, body) => {
