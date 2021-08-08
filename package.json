@@ -83,7 +83,6 @@
     "express": "^4.17.1",
     "gitly": "^2.1.2",
     "jasmine-focused": ">=1.0.7 <2.0",
-    "lint-staged": "^11.1.2",
     "node-downloader-helper": "^1.0.18",
     "node-gyp": "^8.0.0",
     "prettier-config-atomic": "^2.1.0",
