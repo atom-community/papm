@@ -11,6 +11,7 @@ const express = require("express")
 const http = require("http")
 const wrench = require("wrench")
 import * as apm from "../lib/apm-cli"
+import findFreePort from "find-port-free-sync"
 
 describe("apm clean", function () {
   let [moduleDirectory, server] = Array.from([])
@@ -46,13 +47,14 @@ describe("apm clean", function () {
     server = http.createServer(app)
 
     let live = false
-    server.listen(3000, "127.0.0.1", function () {
+    const port = findFreePort()
+    server.listen(port, "127.0.0.1", function () {
       console.log("Server started")
       const atomHome = temp.mkdirSync("apm-home-dir-")
       process.env.ATOM_HOME = atomHome
-      process.env.ATOM_ELECTRON_URL = "http://localhost:3000/node"
+      process.env.ATOM_ELECTRON_URL = `http://localhost:${port}/node`
       process.env.ATOM_ELECTRON_VERSION = "v10.20.1"
-      process.env.npm_config_registry = "http://localhost:3000/"
+      process.env.npm_config_registry = `http://localhost:${port}/`
 
       moduleDirectory = path.join(temp.mkdirSync("apm-test-module-"), "test-module-with-dependencies")
       wrench.copyDirSyncRecursive(path.join(__dirname, "fixtures", "test-module-with-dependencies"), moduleDirectory)

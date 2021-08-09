@@ -87,6 +87,7 @@
     "babel-preset-atomic": "^4.2.0",
     "eslint-config-atomic": "^1.16.2",
     "express": "^4.17.1",
+    "find-port-free-sync": "^1.0.5",
     "gitly": "^2.1.2",
     "jasmine-focused": ">=1.0.7 <2.0",
     "node-downloader-helper": "^2.0.0",
