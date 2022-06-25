@@ -24,20 +24,18 @@ export default class Featured extends Command {
   }
 
   help() {
-    return `\
-
-Usage: apm featured
+    return `Usage: apm featured
        apm featured --themes
        apm featured --compatible 0.49.0
 
 List the Atom packages and themes that are currently featured in the
 atom.io registry.
 
-Options
--t, --themes Only list themes
--c, --compatible Only list packages/themes compatible with this Atom version
---json Output featured packages as JSON array
--h, --help Print this usage message
+Options:
+  --json            Output featured packages as JSON array                                 [boolean]
+  -h, --help        Print this usage message
+  -t, --themes      Only list themes                                                       [boolean]
+  -c, --compatible  Only list packages/themes compatible with this Atom version             [string]
 `
   }
 

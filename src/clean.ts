@@ -11,14 +11,13 @@ export default class Clean extends Command {
   }
 
   help() {
-    return `\
-Usage: apm clean
+    return `Usage: apm clean
 
 Deletes all packages in the node_modules folder that are not referenced
 as a dependency in the package.json file.
 
-Options
--h, --help Print this usage message
+Options:
+  -h, --help  Print this usage message
 `
   }
 

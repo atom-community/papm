@@ -23,14 +23,12 @@ export default class Disable extends Command {
   }
 
   help() {
-    return `\
-
-Usage: apm disable [<package_name>]...
+    return `Usage: apm disable [<package_name>]...
 
 Disables the named package(s).
 
-Options
--h, --help Print this usage message
+Options:
+  -h, --help  Print this usage message
 `
   }
 

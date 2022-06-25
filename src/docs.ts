@@ -17,14 +17,13 @@ export default class Docs extends View {
   }
 
   help() {
-    return `\
-
-Usage: apm docs [options] <package_name>
+    return `Usage: apm docs [options] <package_name>
 
 Open a package's homepage in the default browser.
 
-Options
--p, --print Print the URL instead of opening it
+Options:
+  -h, --help   Print this usage message
+  -p, --print  Print the URL instead of opening it                                         [boolean]
 `
   }
 

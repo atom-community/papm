@@ -27,8 +27,7 @@ export default class Develop extends Command {
   }
 
   help() {
-    return `\
-Usage: apm develop <package_name> [<directory>]
+    return `Usage: apm develop <package_name> [<directory>]
 
 Clone the given package's Git repository to the directory specified,
 install its dependencies, and link it for development to
@@ -41,9 +40,9 @@ be overridden using the ATOM_REPOS_HOME environment variable.
 Once this command completes you can open a dev window from atom using
 cmd-shift-o to run the package out of the newly cloned repository.
 
-Options
---json logging
--h, --help Print this usage message
+Options:
+  -h, --help  Print this usage message
+  --json      Logging
 `
   }
 

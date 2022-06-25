@@ -22,14 +22,12 @@ export default class Enable extends Command {
   }
 
   help() {
-    return `\
-
-Usage: apm enable [<package_name>]...
+    return `Usage: apm enable [<package_name>]...
 
 Enables the named package(s).
 
-Options
--p, --print Print the URL instead of opening it
+Options:
+  -h, --help  Print this usage message
 `
   }
 

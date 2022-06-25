@@ -20,16 +20,14 @@ export default class Dedupe extends Command {
   }
 
   help() {
-    return `\
-
-Usage: apm dedupe [<package_name>...]
+    return `Usage: apm dedupe [<package_name>...]
 
 Reduce duplication in the node_modules folder in the current directory.
 
 This command is experimental.
 
-Options
--h, --help Print this usage message
+Options:
+  -h, --help  Print this usage message
 `
   }
 
