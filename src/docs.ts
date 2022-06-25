@@ -1,49 +1,54 @@
 /*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import yargs from "yargs"
 import open from "open"
 import View from "./view"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Docs extends View {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{ help: boolean; print: boolean; _: string[] }>(argv, {
+      alias: { h: "help", p: "print" },
+      boolean: ["help", "print"],
+    })
+  }
+
+  help() {
+    return `\
 
 Usage: apm docs [options] <package_name>
 
-Open a package's homepage in the default browser.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    return options.boolean("p").alias("p", "print").describe("print", "Print the URL instead of opening it")
+Open a package's homepage in the default browser.
+
+Options
+-p, --print Print the URL instead of opening it
+`
   }
 
   openRepositoryUrl(repositoryUrl) {
     return open(repositoryUrl)
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
-    const [packageName] = Array.from(options.argv._) as [string]
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const packageName = options._[0]
 
     if (!packageName) {
       callback("Missing required package name")
       return
     }
 
-    return this.getPackage(packageName, options, (error, pack) => {
+    return this.getPackage(packageName, givenOptions, (error, pack) => {
       let repository
       if (error != null) {
         return callback(error)
       }
 
       if ((repository = this.getRepository(pack))) {
-        if (options.argv.print) {
+        if (options.print) {
           console.log(repository)
         } else {
           this.openRepositoryUrl(repository)
