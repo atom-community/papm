@@ -115,8 +115,6 @@ const commands = {
   show: viewClass,
 }
 
-const mirCommands = ["clean", "dedupe"]
-
 export type CliOptions = yargs.Argv<{}> & { commandArgs: string[] } // TODO pass commandArgs directly
 
 function parseOptions(args: string[] = []): CliOptions {
@@ -322,7 +320,7 @@ export function run(args: string[], callback: RunCallback) {
   } else if (options.argv.help) {
     if ((Command = commands[options.command]?.())) {
       const cmd = new Command()
-      if (mirCommands.includes(options.command)) {
+      if (typeof cmd.help === "function") {
         // converted to mri
         showHelp(cmd.parseOptions?.(args), cmd)
       } else {

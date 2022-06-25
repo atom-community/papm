@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS104: Avoid inline assignments
  * DS207: Consider shorter variations of null checks
@@ -9,7 +8,6 @@
 import fs from "fs"
 import path from "path"
 import async from "async"
-import yargs from "yargs"
 import * as config from "./apm"
 import Command, { LogCommandResultsArgs } from "./command"
 import Install from "./install"
@@ -18,12 +16,18 @@ import Link from "./link"
 import * as request from "./request"
 import { PackageMetadata, unkownPackage } from "./packages"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Develop extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
+    return mri<{ help: boolean }>(argv, {
+      alias: { h: "help" },
+      boolean: "help",
+    })
+  }
 
-    options.usage(`\
+  help() {
+    return `\
 Usage: apm develop <package_name> [<directory>]
 
 Clone the given package's Git repository to the directory specified,
@@ -36,8 +40,7 @@ be overridden using the ATOM_REPOS_HOME environment variable.
 
 Once this command completes you can open a dev window from atom using
 cmd-shift-o to run the package out of the newly cloned repository.\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+`
   }
 
   getRepositoryUrl(packageName: string, callback) {
