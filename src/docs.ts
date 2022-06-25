@@ -34,12 +34,12 @@ Options
 
   run(givenOptions: CliOptions, callback: RunCallback) {
     const options = this.parseOptions(givenOptions.commandArgs)
-    const packageName = options._[0]
+    const packageNames = this.packageNamesFromArgv(options)
 
-    if (!packageName) {
-      callback("Missing required package name")
-      return
+    if (packageNames.length !== 1) {
+      return callback("One package name should be specified")
     }
+    const packageName = packageNames[0]
 
     return this.getPackage(packageName, givenOptions, (error, pack) => {
       let repository

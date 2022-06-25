@@ -20,7 +20,7 @@ import mri from "mri"
 
 export default class Develop extends Command {
   parseOptions(argv: string[]) {
-    return mri<{ help: boolean }>(argv, {
+    return mri<{ help: boolean; _: string[] }>(argv, {
       alias: { h: "help" },
       boolean: "help",
     })
@@ -39,7 +39,10 @@ If no directory is specified then the repository is cloned to
 be overridden using the ATOM_REPOS_HOME environment variable.
 
 Once this command completes you can open a dev window from atom using
-cmd-shift-o to run the package out of the newly cloned repository.\
+cmd-shift-o to run the package out of the newly cloned repository.
+
+Options
+-h, --help Print this usage message
 `
   }
 
@@ -98,31 +101,30 @@ cmd-shift-o to run the package out of the newly cloned repository.\
     return new Link().run(linkOptions, callback)
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    let left: string
-    const packageName = options.commandArgs.shift()
-
-    if (packageName?.length <= 0) {
-      return callback("Missing required package name")
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const packageNames = this.packageNamesFromArgv(options)
+    if (packageNames.length === 0) {
+      return callback("One package name should be specified")
     }
-
-    let packageDirectory: string =
-      (left = options.commandArgs.shift()) != null ? left : path.join(config.getReposDirectory(), packageName)
-    packageDirectory = path.resolve(packageDirectory)
+    const packageName = packageNames[0]
+    const packageDirectory = path.resolve(
+      packageNames[1] ? packageNames[1] : path.join(config.getReposDirectory(), packageName)
+    )
 
     if (fs.existsSync(packageDirectory)) {
-      return this.linkPackage(packageDirectory, options, callback)
+      return this.linkPackage(packageDirectory, givenOptions, callback)
     } else {
       return this.getRepositoryUrl(packageName, (error, repoUrl: string) => {
         if (error != null) {
           return callback(error)
         } else {
           const tasks = []
-          tasks.push((cb) => this.cloneRepository(repoUrl, packageDirectory, options, cb))
+          tasks.push((cb) => this.cloneRepository(repoUrl, packageDirectory, givenOptions, cb))
 
-          tasks.push((cb) => this.installDependencies(packageDirectory, options, cb))
+          tasks.push((cb) => this.installDependencies(packageDirectory, givenOptions, cb))
 
-          tasks.push((cb) => this.linkPackage(packageDirectory, options, cb))
+          tasks.push((cb) => this.linkPackage(packageDirectory, givenOptions, cb))
 
           return async.waterfall(tasks, callback)
         }

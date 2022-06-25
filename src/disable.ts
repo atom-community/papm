@@ -16,7 +16,7 @@ import mri from "mri"
 
 export default class Disable extends Command {
   parseOptions(argv: string[]) {
-    return mri<{ help: boolean }>(argv, {
+    return mri<{ help: boolean; _: string[] }>(argv, {
       alias: { h: "help" },
       boolean: "help",
     })
@@ -49,11 +49,10 @@ Disables the named package(s).\
     )
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  run(givenOptions: CliOptions, callback: RunCallback) {
     let settings
-    options = this.parseOptions(options.commandArgs)
-
-    let packageNames = this.packageNamesFromArgv(options.argv)
+    const options = this.parseOptions(givenOptions.commandArgs)
+    let packageNames = this.packageNamesFromArgv(options)
 
     const configFilePath = CSON.resolve(path.join(config.getAtomDirectory(), "config"))
     if (!configFilePath) {
@@ -63,8 +62,7 @@ Disables the named package(s).\
 
     try {
       settings = CSON.readFileSync(configFilePath)
-    } catch (error1) {
-      const error = error1
+    } catch (error) {
       callback(`Failed to load \`${configFilePath}\`: ${error.message}`)
       return
     }

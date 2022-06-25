@@ -13,7 +13,7 @@ import mri from "mri"
 
 export default class Dedupe extends Command {
   parseOptions(argv: string[]) {
-    return mri<{ help: boolean }>(argv, {
+    return mri<{ help: boolean; _: string[] }>(argv, {
       alias: { h: "help" },
       boolean: "help",
     })
@@ -26,19 +26,22 @@ Usage: apm dedupe [<package_name>...]
 
 Reduce duplication in the node_modules folder in the current directory.
 
-This command is experimental.\
+This command is experimental.
+
+Options
+-h, --help Print this usage message
 `
   }
 
-  dedupeModules(options, callback) {
+  dedupeModules(options, packageNames, callback) {
     process.stdout.write("Deduping modules ")
 
-    return this.forkDedupeCommand(options, (...args: LogCommandResultsArgs) => {
+    return this.forkDedupeCommand(options, packageNames, (...args: LogCommandResultsArgs) => {
       return this.logCommandResults(callback, ...args)
     })
   }
 
-  forkDedupeCommand(options, callback) {
+  forkDedupeCommand(options, packageNames, callback) {
     const dedupeArgs = [
       "--globalconfig",
       config.getGlobalConfigPath(),
@@ -54,7 +57,7 @@ This command is experimental.\
       dedupeArgs.push("--quiet")
     }
 
-    for (const packageName of options.argv._) {
+    for (const packageName of packageNames) {
       dedupeArgs.push(packageName)
     }
 
@@ -76,16 +79,15 @@ This command is experimental.\
     return fs.makeTreeSync(this.atomNodeDirectory)
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    const { cwd } = options
-    options = this.parseOptions(options.commandArgs)
-    options.cwd = cwd
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const packageNames = this.packageNamesFromArgv(options)
 
     this.createAtomDirectories()
 
     const commands = []
     commands.push((callback) => this.loadInstalledAtomMetadata(callback))
-    commands.push((callback) => this.dedupeModules(options, callback))
+    commands.push((callback) => this.dedupeModules(givenOptions, packageNames, callback))
     return async.waterfall(commands, callback)
   }
 }

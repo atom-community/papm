@@ -15,7 +15,7 @@ import mri from "mri"
 
 export default class Enable extends Command {
   parseOptions(argv: string[]) {
-    return mri<{ help: boolean }>(argv, {
+    return mri<{ help: boolean; _: string[] }>(argv, {
       alias: { h: "help" },
       boolean: "help",
     })
@@ -26,14 +26,17 @@ export default class Enable extends Command {
 
 Usage: apm enable [<package_name>]...
 
-Enables the named package(s).\
+Enables the named package(s).
+
+Options
+-p, --print Print the URL instead of opening it
 `
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  run(givenOptions: CliOptions, callback: RunCallback) {
     let error: Error, left, settings
-    options = this.parseOptions(options.commandArgs)
-    let packageNames = this.packageNamesFromArgv(options.argv)
+    const options = this.parseOptions(givenOptions.commandArgs)
+    let packageNames = this.packageNamesFromArgv(options)
 
     const configFilePath = CSON.resolve(path.join(config.getAtomDirectory(), "config"))
     if (!configFilePath) {
