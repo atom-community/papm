@@ -149,7 +149,7 @@ function showHelp(options: CliOptions, cmd: Command & { help: () => string }) {
     return
   }
 
-  let help = options.help === true ? cmd.help() /* mri */ : options.help() /* yargs */
+  let help = typeof options.help !== "function" ? cmd.help() /* mri */ : options.help() /* yargs */
   if (help.indexOf("Options:") >= 0) {
     help += "\n  Prefix an option with `no-` to set it to false such as --no-color to disable"
     help += "\n  colored output."
