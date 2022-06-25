@@ -7,13 +7,13 @@
  */
 import path from "path"
 import CSON from "season"
-import yargs from "yargs"
 import Command from "./command"
 import fs from "./fs"
 import * as config from "./apm"
 import { tree } from "./tree"
 import { getRepository, PackageMetadata } from "./packages"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class List extends Command {
   private disabledPackages?: string[]
@@ -34,10 +34,50 @@ export default class List extends Command {
   }
 
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{
+      help: boolean
+      bare: boolean
+      enabled: boolean
+      dev: boolean
+      disabled: boolean
+      installed: boolean
+      json: boolean
+      links: boolean
+      themes: boolean
+      packages: boolean
+      versions: boolean
+    }>(argv, {
+      alias: {
+        h: "help",
+        b: "bare",
+        e: "enabled",
+        d: "dev",
+        i: "installed",
+        j: "json",
+        l: "links",
+        t: "themes",
+        p: "packages",
+        v: "versions",
+      },
+      boolean: [
+        "help",
+        "bare",
+        "enabled",
+        "dev",
+        "disabled",
+        "installed",
+        "json",
+        "links",
+        "themes",
+        "packages",
+        "versions",
+      ],
+      default: { versions: true },
+    })
+  }
 
-Usage: apm list
+  help() {
+    return `Usage: apm list
        apm list --themes
        apm list --packages
        apm list --installed
@@ -45,36 +85,34 @@ Usage: apm list
        apm list --installed --bare > my-packages.txt
        apm list --json
 
-List all the installed packages and also the packages bundled with Atom.\
-`)
-    options.alias("b", "bare").boolean("bare").describe("bare", "Print packages one per line with no formatting")
-    options.alias("e", "enabled").boolean("enabled").describe("enabled", "Print only enabled packages")
-    options.alias("d", "dev").boolean("dev").default("dev", true).describe("dev", "Include dev packages")
-    options.boolean("disabled").describe("disabled", "Print only disabled packages")
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.alias("i", "installed").boolean("installed").describe("installed", "Only list installed packages/themes")
-    options.alias("j", "json").boolean("json").describe("json", "Output all packages as a JSON object")
-    options.alias("l", "links").boolean("links").default("links", true).describe("links", "Include linked packages")
-    options.alias("t", "themes").boolean("themes").describe("themes", "Only list themes")
-    options.alias("p", "packages").boolean("packages").describe("packages", "Only list packages")
-    return options
-      .alias("v", "versions")
-      .boolean("versions")
-      .default("versions", true)
-      .describe("versions", "Include version of each package")
+List all the installed packages and also the packages bundled with Atom.
+
+Options:
+  --disabled       Print only disabled packages                                            [boolean]
+  -b, --bare       Print packages one per line with no formatting                          [boolean]
+  -e, --enabled    Print only enabled packages                                             [boolean]
+  -d, --dev        Include dev packages                                    [boolean] [default: true]
+  -h, --help       Print this usage message
+  -i, --installed  Only list installed packages/themes                                     [boolean]
+  -j, --json       Output all packages as a JSON object                                    [boolean]
+  -l, --links      Include linked packages                                 [boolean] [default: true]
+  -t, --themes     Only list themes                                                        [boolean]
+  -p, --packages   Only list packages                                                      [boolean]
+  -v, --versions   Include version of each package                         [boolean] [default: true]
+`
   }
 
-  isPackageDisabled(name) {
+  isPackageDisabled(name: string) {
     return this.disabledPackages.includes(name)
   }
 
-  logPackages(packages: PackageMetadata[], options) {
-    if (options.argv.bare) {
+  logPackages(packages: PackageMetadata[], options: ReturnType<List["parseOptions"]>) {
+    if (options.bare) {
       return (() => {
         const result = []
         for (const pack of packages) {
           let packageLine = pack.name
-          if (pack.version != null && options.argv.versions) {
+          if (pack.version != null && options.versions) {
             packageLine += `@${pack.version}`
           }
           result.push(console.log(packageLine))
@@ -84,7 +122,7 @@ List all the installed packages and also the packages bundled with Atom.\
     } else {
       tree(packages, {}, (pack) => {
         let packageLine = pack.name
-        if (pack.version != null && options.argv.versions) {
+        if (pack.version != null && options.versions) {
           packageLine += `@${pack.version}`
         }
         if (pack.apmInstallSource?.type === "git") {
@@ -95,7 +133,7 @@ List all the installed packages and also the packages bundled with Atom.\
           }
           packageLine += ` (${shaLine})`.grey
         }
-        if (this.isPackageDisabled(pack.name) && !options.argv.disabled) {
+        if (this.isPackageDisabled(pack.name) && !options.disabled) {
           packageLine += " (disabled)"
         }
         return packageLine
@@ -104,24 +142,29 @@ List all the installed packages and also the packages bundled with Atom.\
     }
   }
 
-  checkExclusiveOptions(options, positive_option, negative_option, value) {
-    if (options.argv[positive_option]) {
+  checkExclusiveOptions(
+    options: ReturnType<List["parseOptions"]>,
+    positive_option: string,
+    negative_option: string,
+    value: string | boolean
+  ) {
+    if (options[positive_option]) {
       return value
-    } else if (options.argv[negative_option]) {
+    } else if (options[negative_option]) {
       return !value
     } else {
       return true
     }
   }
 
-  isPackageVisible(options, manifest) {
+  isPackageVisible(options: ReturnType<List["parseOptions"]>, manifest: PackageMetadata) {
     return (
       this.checkExclusiveOptions(options, "themes", "packages", manifest.theme) &&
       this.checkExclusiveOptions(options, "disabled", "enabled", this.isPackageDisabled(manifest.name))
     )
   }
 
-  listPackages(directoryPath, options) {
+  listPackages(directoryPath: string, options: ReturnType<List["parseOptions"]>) {
     const packages = []
     for (const child of fs.list(directoryPath)) {
       let manifestPath
@@ -131,7 +174,7 @@ List all the installed packages and also the packages bundled with Atom.\
       if (child.match(/^\./)) {
         continue
       }
-      if (!options.argv.links) {
+      if (!options.links) {
         if (fs.isSymbolicLinkSync(path.join(directoryPath, child))) {
           continue
         }
@@ -159,44 +202,44 @@ List all the installed packages and also the packages bundled with Atom.\
     return packages
   }
 
-  listUserPackages(options, callback) {
+  listUserPackages(options: ReturnType<List["parseOptions"]>, callback) {
     const userPackages = this.listPackages(this.atomPackagesDirectory, options).filter((pack) => !pack.apmInstallSource)
-    if (!options.argv.bare && !options.argv.json) {
+    if (!options.bare && !options.json) {
       console.log(`Community Packages (${userPackages.length})`.cyan, `${this.atomPackagesDirectory}`)
     }
     return callback?.(null, userPackages)
   }
 
-  listDevPackages(options, callback) {
-    if (!options.argv.dev) {
+  listDevPackages(options: ReturnType<List["parseOptions"]>, callback) {
+    if (!options.dev) {
       return callback?.(null, [])
     }
 
     const devPackages = this.listPackages(this.atomDevPackagesDirectory, options)
     if (devPackages.length > 0) {
-      if (!options.argv.bare && !options.argv.json) {
+      if (!options.bare && !options.json) {
         console.log(`Dev Packages (${devPackages.length})`.cyan, `${this.atomDevPackagesDirectory}`)
       }
     }
     return callback?.(null, devPackages)
   }
 
-  listGitPackages(options, callback) {
+  listGitPackages(options: ReturnType<List["parseOptions"]>, callback) {
     const gitPackages = this.listPackages(this.atomPackagesDirectory, options).filter(
       (pack) => pack.apmInstallSource?.type === "git"
     )
     if (gitPackages.length > 0) {
-      if (!options.argv.bare && !options.argv.json) {
+      if (!options.bare && !options.json) {
         console.log(`Git Packages (${gitPackages.length})`.cyan, `${this.atomPackagesDirectory}`)
       }
     }
     return callback?.(null, gitPackages)
   }
 
-  listBundledPackages(options, callback) {
-    return config.getResourcePath((resourcePath) => {
-      let _atomPackages
-      let metadata
+  listBundledPackages(options: ReturnType<List["parseOptions"]>, callback) {
+    return config.getResourcePath((resourcePath: string) => {
+      let _atomPackages: Record<string, PackageMetadata>
+      let metadata: PackageMetadata
       try {
         const metadataPath = path.join(resourcePath, "package.json")
         ;({ _atomPackages } = JSON.parse(fs.readFileSync(metadataPath)))
@@ -207,7 +250,7 @@ List all the installed packages and also the packages bundled with Atom.\
         _atomPackages = {}
       }
       let packages = (() => {
-        const result = []
+        const result: PackageMetadata[] = []
         for (const packageName in _atomPackages) {
           ;({ metadata } = _atomPackages[packageName])
           result.push(metadata)
@@ -219,8 +262,8 @@ List all the installed packages and also the packages bundled with Atom.\
         return this.isPackageVisible(options, metadata)
       })
 
-      if (!options.argv.bare && !options.argv.json) {
-        if (options.argv.themes) {
+      if (!options.bare && !options.json) {
+        if (options.themes) {
           console.log(`${"Built-in Atom Themes".cyan} (${packages.length})`)
         } else {
           console.log(`${"Built-in Atom Packages".cyan} (${packages.length})`)
@@ -231,7 +274,7 @@ List all the installed packages and also the packages bundled with Atom.\
     })
   }
 
-  listInstalledPackages(options) {
+  listInstalledPackages(options: ReturnType<List["parseOptions"]>) {
     return this.listDevPackages(options, (error, packages) => {
       if (packages.length > 0) {
         this.logPackages(packages, options)
@@ -249,7 +292,7 @@ List all the installed packages and also the packages bundled with Atom.\
     })
   }
 
-  listPackagesAsJson(options, callback = function () {}) {
+  listPackagesAsJson(options: ReturnType<List["parseOptions"]>, callback: (err?: string) => void = function () {}) {
     const output = {
       core: [],
       dev: [],
@@ -285,16 +328,16 @@ List all the installed packages and also the packages bundled with Atom.\
     })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
 
-    if (options.argv.json) {
+    if (options.json) {
       return this.listPackagesAsJson(options, callback)
-    } else if (options.argv.installed) {
+    } else if (options.installed) {
       this.listInstalledPackages(options)
       return callback()
     } else {
-      return this.listBundledPackages(options, (error, packages) => {
+      return this.listBundledPackages(options, (error: string, packages: PackageMetadata[]) => {
         this.logPackages(packages, options)
         this.listInstalledPackages(options)
         return callback()
