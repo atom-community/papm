@@ -5,24 +5,29 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import async from "async"
-import yargs from "yargs"
 import * as config from "./apm"
 import Command, { LogCommandResultsArgs } from "./command"
 import fs from "./fs"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Dedupe extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{ help: boolean }>(argv, {
+      alias: { h: "help" },
+      boolean: "help",
+    })
+  }
+
+  help() {
+    return `\
 
 Usage: apm dedupe [<package_name>...]
 
 Reduce duplication in the node_modules folder in the current directory.
 
 This command is experimental.\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+`
   }
 
   dedupeModules(options, callback) {

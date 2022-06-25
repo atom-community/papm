@@ -115,7 +115,7 @@ const commands = {
   show: viewClass,
 }
 
-const mirCommands = ["clean"]
+const mirCommands = ["clean", "dedupe"]
 
 export type CliOptions = yargs.Argv<{}> & { commandArgs: string[] } // TODO pass commandArgs directly
 
