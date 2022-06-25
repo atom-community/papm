@@ -34,11 +34,9 @@ Options:
 
   getInstalledPackages(callback) {
     const options = {
-      argv: {
-        theme: false,
-        bare: true,
-      },
-    }
+      theme: false,
+      bare: true,
+    } as ReturnType<List["parseOptions"]>
 
     const lister = new List()
     return lister.listBundledPackages(options, (error, core_packages) =>
