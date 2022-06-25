@@ -1,6 +1,4 @@
 /*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS104: Avoid inline assignments
  * DS207: Consider shorter variations of null checks
@@ -11,7 +9,6 @@ import path from "path"
 import * as _ from "@aminya/underscore-plus"
 import async from "async"
 import CSON from "season"
-import yargs from "yargs"
 import Git from "git-utils"
 import semver from "semver"
 import temp from "temp"
@@ -25,16 +22,39 @@ import { isDeprecatedPackage } from "./deprecated-packages"
 import type { CliOptions, RunCallback } from "./apm-cli"
 import type { SpawnArgs } from "./command"
 import { ChildProcessWithoutNullStreams } from "child_process"
+import mri from "mri"
+import { PackageMetadata } from "./packages"
+import { PackageData } from "./stars"
 
 export default class Install extends Command {
   private repoLocalPackagePathRegex = /^file:(?!\/\/)(.*)/
   verbose: boolean
 
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{
+      help: boolean
+      silent: boolean
+      quiet: boolean
+      check: boolean
+      verbose: boolean
+      production: boolean
+      json: boolean
+      package: string
+      compatible: string
+      "packages-file": string
 
-Usage: apm install [<package_name>...]
+      // manually added later
+      installGlobally: boolean
+      cwd: string
+    }>(argv, {
+      alias: { h: "help", c: "compatible", s: "silent", q: "quiet" },
+      boolean: ["help", "silent", "quiet", "check", "verbose", "production", "json"],
+      string: ["package", "compatible", "packages-file"],
+    })
+  }
+
+  help() {
+    return `Usage: apm install [<package_name>...]
        apm install <package_name>@<package_version>
        apm install <git_remote>
        apm install <github_username>/<github_project>
@@ -49,22 +69,27 @@ directory.
 
 A packages file can be specified that is a newline separated list of
 package names to install with optional versions using the
-\`package-name@version\` syntax.\
-`)
-    options
-      .alias("c", "compatible")
-      .string("compatible")
-      .describe("compatible", "Only install packages/themes compatible with this Atom version")
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.alias("s", "silent").boolean("silent").describe("silent", "Set the npm log level to silent")
-    options.alias("q", "quiet").boolean("quiet").describe("quiet", "Set the npm log level to warn")
-    options.boolean("check").describe("check", "Check that native build tools are installed")
-    options.boolean("verbose").default("verbose", false).describe("verbose", "Show verbose debug information")
-    options.string("packages-file").describe("packages-file", "A text file containing the packages to install")
-    return options.boolean("production").describe("production", "Do not install dev dependencies")
+\`package-name@version\` syntax.
+
+Options:
+  --check           Check that native build tools are installed                            [boolean]
+  --verbose         Show verbose debug information                        [boolean] [default: false]
+  --packages-file   A text file containing the packages to install                          [string]
+  --production      Do not install dev dependencies                                        [boolean]
+  -c, --compatible  Only install packages/themes compatible with this Atom version          [string]
+  -h, --help        Print this usage message
+  -s, --silent      Set the npm log level to silent                                        [boolean]
+  -q, --quiet       Set the npm log level to warn                                          [boolean]
+  --json            Logging                                                                [boolean]
+`
   }
 
-  installModule(options, pack, moduleURI, callback) {
+  installModule(
+    options: ReturnType<Install["parseOptions"]>,
+    pack: { name: string },
+    moduleURI: string,
+    callback: (err: string | Error, pack?: { name: string; installPath: string }) => void
+  ) {
     let installDirectory, nodeModulesDirectory
     const installGlobally = options.installGlobally != null ? options.installGlobally : true
 
@@ -80,16 +105,16 @@ package names to install with optional versions using the
     if (installGlobally) {
       installArgs.push("--global-style")
     }
-    if (options.argv.silent) {
+    if (options.silent) {
       installArgs.push("--silent")
     }
-    if (options.argv.quiet) {
+    if (options.quiet) {
       installArgs.push("--quiet")
     }
-    if (options.argv.production) {
+    if (options.production) {
       installArgs.push("--production")
     }
-    if (options.argv.verbose) {
+    if (options.verbose) {
       installArgs.push("--verbose")
     }
 
@@ -135,7 +160,7 @@ package names to install with optional versions using the
             if (error != null) {
               this.logFailure()
             } else {
-              if (!options.argv.json) {
+              if (!options.json) {
                 this.logSuccess()
               }
             }
@@ -159,7 +184,7 @@ package names to install with optional versions using the
     })
   }
 
-  getGitErrorMessage(pack) {
+  getGitErrorMessage(pack: { name: string }) {
     let message = `\
 Failed to install ${pack.name} because Git was not found.
 
@@ -194,22 +219,22 @@ Run apm -v after installing Git to see what version has been detected.\
     return message
   }
 
-  installModules = (options, callback) => {
-    if (!options.argv.json) {
+  installModules = (options: ReturnType<Install["parseOptions"]>, callback) => {
+    if (!options.json) {
       process.stdout.write("Installing modules ")
     }
 
     return this.forkInstallCommand(options, (...args) => {
-      if (options.argv.json) {
-        return this.logCommandResultsIfFail(callback, ...Array.from(args))
+      if (options.json) {
+        return this.logCommandResultsIfFail(callback, ...args)
       } else {
-        return this.logCommandResults(callback, ...Array.from(args))
+        return this.logCommandResults(callback, ...args)
       }
     })
   }
 
   forkInstallCommand(
-    options: { argv: { silent: boolean; quiet: boolean; production: boolean }; cwd: string },
+    options: ReturnType<Install["parseOptions"]>,
     callback: (code: number, stderr?: string, stdout?: string) => void
   ) {
     const installArgs = [
@@ -220,13 +245,13 @@ Run apm -v after installing Git to see what version has been detected.\
       "install",
     ]
     installArgs.push(...Array.from(this.getNpmBuildFlags() || []))
-    if (options.argv.silent) {
+    if (options.silent) {
       installArgs.push("--silent")
     }
-    if (options.argv.quiet) {
+    if (options.quiet) {
       installArgs.push("--quiet")
     }
-    if (options.argv.production) {
+    if (options.production) {
       installArgs.push("--production")
     }
 
@@ -282,7 +307,7 @@ Run apm -v after installing Git to see what version has been detected.\
   //
   //  * packageName: The string name of the package.
   //  * packageVersion: The string version of the package.
-  isPackageInstalled(packageName, packageVersion) {
+  isPackageInstalled(packageName: string, packageVersion: string) {
     try {
       let left: { version: string }
       const { version } =
@@ -301,7 +326,7 @@ Run apm -v after installing Git to see what version has been detected.\
   // options - The installation options object.
   // callback - The function to invoke when installation completes with an
   //            error as the first argument.
-  installRegisteredPackage(metadata, options, callback) {
+  installRegisteredPackage(metadata: PackageMetadata, options: ReturnType<Install["parseOptions"]>, callback) {
     const packageName = metadata.name
     let packageVersion = metadata.version
 
@@ -317,7 +342,7 @@ Run apm -v after installing Git to see what version has been detected.\
     if (packageVersion) {
       label += `@${packageVersion}`
     }
-    if (!options.argv.json) {
+    if (!options.json) {
       process.stdout.write(`Installing ${label} `)
       if (installGlobally) {
         process.stdout.write(`to ${this.atomPackagesDirectory} `)
@@ -369,7 +394,7 @@ Run apm -v after installing Git to see what version has been detected.\
             if (error != null) {
               this.logFailure()
             } else {
-              if (!options.argv.json) {
+              if (!options.json) {
                 this.logSuccess()
               }
             }
@@ -387,14 +412,19 @@ Run apm -v after installing Git to see what version has been detected.\
   // options     - The installation options object.
   // callback    - The function to invoke when installation completes with an
   //               error as the first argument.
-  installLocalPackage(packageName, packagePath, options, callback) {
-    if (!options.argv.json) {
+  installLocalPackage(
+    packageName: string,
+    packagePath: string,
+    options: ReturnType<Install["parseOptions"]>,
+    callback: (err: Error, json: string) => void
+  ) {
+    if (!options.json) {
       process.stdout.write(`Installing ${packageName} from ${packagePath.slice("file:".length)} `)
       const commands = []
       commands.push((next) => {
         return this.installModule(options, { name: packageName }, packagePath, next)
       })
-      commands.push(function ({ installPath }, next) {
+      commands.push(function ({ installPath }: { installPath: string }, next) {
         if (installPath != null) {
           const metadata = JSON.parse(fs.readFileSync(path.join(installPath, "package.json"), "utf8"))
           const json = { installPath, metadata }
@@ -404,11 +434,11 @@ Run apm -v after installing Git to see what version has been detected.\
         }
       }) // installed locally, no install path data
 
-      return async.waterfall(commands, (error, json) => {
+      return async.waterfall(commands, (error, json: string) => {
         if (error != null) {
           this.logFailure()
         } else {
-          if (!options.argv.json) {
+          if (!options.json) {
             this.logSuccess()
           }
         }
@@ -422,7 +452,7 @@ Run apm -v after installing Git to see what version has been detected.\
   // options - The installation options
   // callback - The callback function to invoke when done with an error as the
   //            first argument.
-  installPackageDependencies(options, callback) {
+  installPackageDependencies(options: ReturnType<Install["parseOptions"]>, callback) {
     options = { ...options, installGlobally: false }
     const commands = []
     const object = this.getPackageDependencies()
@@ -442,7 +472,7 @@ Run apm -v after installing Git to see what version has been detected.\
     return async.series(commands, callback)
   }
 
-  installDependencies(options, callback) {
+  installDependencies(options: ReturnType<Install["parseOptions"]>, callback) {
     options.installGlobally = false
     const commands = []
     commands.push((callback) => this.installModules(options, callback))
@@ -484,7 +514,7 @@ Run apm -v after installing Git to see what version has been detected.\
     }
   }
 
-  getRepoLocalPackagePath(packageSpec) {
+  getRepoLocalPackagePath(packageSpec: string) {
     if (!packageSpec) {
       return undefined
     }
@@ -531,11 +561,11 @@ Run apm -v after installing Git to see what version has been detected.\
     fs.removeSync(path.resolve(__dirname, "..", "native-module", "build"))
 
     return this.fork(this.atomNpmPath, buildArgs, buildOptions, (...args) => {
-      return this.logCommandResults(callback, ...Array.from(args))
+      return this.logCommandResults(callback, ...args)
     })
   }
 
-  packageNamesFromPath(filePath) {
+  packageNamesFromPath(filePath: string) {
     filePath = path.resolve(filePath)
 
     if (!fs.isFileSync(filePath)) {
@@ -546,7 +576,7 @@ Run apm -v after installing Git to see what version has been detected.\
     return this.sanitizePackageNames(packages.split(/\s/))
   }
 
-  buildModuleCache(packageName, callback) {
+  buildModuleCache(packageName: string, callback) {
     const packageDirectory = path.join(this.atomPackagesDirectory, packageName)
     const rebuildCacheCommand = new RebuildModuleCache()
     return rebuildCacheCommand.rebuild(packageDirectory, () =>
@@ -555,7 +585,7 @@ Run apm -v after installing Git to see what version has been detected.\
     )
   }
 
-  warmCompileCache(packageName, callback) {
+  warmCompileCache(packageName: string, callback) {
     const packageDirectory = path.join(this.atomPackagesDirectory, packageName)
 
     return this.getResourcePath((resourcePath) => {
@@ -580,7 +610,7 @@ Run apm -v after installing Git to see what version has been detected.\
     })
   }
 
-  isBundledPackage(packageName, callback) {
+  isBundledPackage(packageName: string, callback) {
     return this.getResourcePath(function (resourcePath) {
       let atomMetadata
       try {
@@ -593,7 +623,7 @@ Run apm -v after installing Git to see what version has been detected.\
     })
   }
 
-  getLatestCompatibleVersion(pack) {
+  getLatestCompatibleVersion(pack: PackageData) {
     if (!this.installedAtomVersion) {
       if (isDeprecatedPackage(pack.name, pack.releases.latest)) {
         return null
@@ -635,11 +665,15 @@ Run apm -v after installing Git to see what version has been detected.\
     return latestVersion
   }
 
-  getHostedGitInfo(name) {
+  getHostedGitInfo(name: string) {
     return hostedGitInfo.fromUrl(name)
   }
 
-  installGitPackage(packageUrl, options, callback) {
+  installGitPackage(
+    packageUrl: string,
+    options: ReturnType<Install["parseOptions"]>,
+    callback: async.AsyncResultCallback<{}, Error>
+  ) {
     const tasks = []
 
     const cloneDir = temp.mkdirSync("atom-git-package-clone-")
@@ -681,14 +715,14 @@ Run apm -v after installing Git to see what version has been detected.\
     tasks.push((data, next) => {
       const { name } = data.metadata
       const targetDir = path.join(this.atomPackagesDirectory, name)
-      if (!options.argv.json) {
+      if (!options.json) {
         process.stdout.write(`Moving ${name} to ${targetDir} `)
       }
       return fs.cp(cloneDir, targetDir, (err) => {
         if (err) {
           return next(err)
         } else {
-          if (!options.argv.json) {
+          if (!options.json) {
             this.logSuccess()
           }
           const json = { installPath: targetDir, metadata: data.metadata }
@@ -701,7 +735,7 @@ Run apm -v after installing Git to see what version has been detected.\
     return async.reduce(tasks, {}, iteratee, callback)
   }
 
-  getNormalizedGitUrls(packageUrl) {
+  getNormalizedGitUrls(packageUrl: string) {
     const packageInfo = this.getHostedGitInfo(packageUrl)
 
     if (packageUrl.indexOf("file://") === 0) {
@@ -718,7 +752,7 @@ Run apm -v after installing Git to see what version has been detected.\
   cloneFirstValidGitUrl(
     urls: string[],
     cloneDir: string,
-    options: Record<string, string>,
+    options: ReturnType<Install["parseOptions"]>,
     callback: (err?: Error) => any
   ) {
     return async.detectSeries(
@@ -738,15 +772,20 @@ Run apm -v after installing Git to see what version has been detected.\
     )
   }
 
-  cloneNormalizedUrl(url: string, cloneDir: string, options: Record<string, string>, callback: (err?: Error) => any) {
+  cloneNormalizedUrl(
+    url: string,
+    cloneDir: string,
+    options: ReturnType<Install["parseOptions"]>,
+    callback: (err?: string) => any
+  ) {
     // Require here to avoid circular dependency
-    const Develop = require("./develop").default
+    const Develop = require("./develop").default as typeof import("./develop").default
     const develop = new Develop()
 
     return develop.cloneRepository(url, cloneDir, options, (err) => callback(err))
   }
 
-  installGitPackageDependencies = (directory, options, callback) => {
+  installGitPackageDependencies(directory, options: ReturnType<Install["parseOptions"]>, callback) {
     options.cwd = directory
     return this.installDependencies(options, callback)
   }
@@ -761,14 +800,14 @@ Run apm -v after installing Git to see what version has been detected.\
     }
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  run(givenOptions: CliOptions, callback: RunCallback) {
     let packageNames: string[]
-    options = this.parseOptions(options.commandArgs)
-    const packagesFilePath: string | undefined = options.argv["packages-file"]
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const packagesFilePath: string | undefined = options["packages-file"]
 
     this.createAtomDirectories()
 
-    if (options.argv.check) {
+    if (options.check) {
       config.loadNpm((error, npm) => {
         this.npm = npm
         return this.loadInstalledAtomMetadata(() => {
@@ -778,7 +817,7 @@ Run apm -v after installing Git to see what version has been detected.\
       return
     }
 
-    this.verbose = options.argv.verbose
+    this.verbose = options.verbose
     if (this.verbose) {
       request.debug(true)
       process.env.NODE_DEBUG = "request"
@@ -823,7 +862,7 @@ with Atom will be used.\
         return callback(error as Error)
       }
     } else {
-      packageNames = this.packageNamesFromArgv(options.argv)
+      packageNames = this.packageNamesFromArgv(options)
       if (packageNames.length === 0) {
         packageNames.push(".")
       }
@@ -845,7 +884,7 @@ with Atom will be used.\
       }
       installedPackagesInfo = _.compact(installedPackagesInfo)
       installedPackagesInfo = installedPackagesInfo.filter((item, idx) => packageNames[idx] !== ".")
-      if (options.argv.json) {
+      if (options.json) {
         console.log(JSON.stringify(installedPackagesInfo, null, "  "))
       }
       return callback(null)

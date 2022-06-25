@@ -72,7 +72,7 @@ Options:
     repoUrl: string,
     packageDirectory: string,
     options: ReturnType<Develop["parseOptions"]>,
-    callback = function () {}
+    callback: (err?: string) => any = function () {}
   ) {
     return config.getSetting("git", (command) => {
       if (command == null) {
