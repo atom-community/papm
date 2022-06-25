@@ -100,7 +100,7 @@ Options:
     return new Install().run(installOptions, callback)
   }
 
-  linkPackage(packageDirectory: string, options, callback = function () {}) {
+  linkPackage(packageDirectory: string, options: CliOptions, callback = function () {}) {
     const linkOptions = { ...options }
     linkOptions.commandArgs = [packageDirectory, "--dev"]
     return new Link().run(linkOptions, callback)
