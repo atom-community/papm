@@ -9,6 +9,7 @@ const temp = require("temp")
 const express = require("express")
 const http = require("http")
 import * as apm from "../lib/apm-cli"
+import findFreePort from "find-port-free-sync"
 
 describe("apm rebuild", function () {
   let [server, originalPathEnv] = Array.from([])
@@ -37,11 +38,13 @@ describe("apm rebuild", function () {
     server = http.createServer(app)
 
     let live = false
-    server.listen(3000, "127.0.0.1", function () {
+
+    const port = findFreePort()
+    server.listen(port, "127.0.0.1", function () {
       const atomHome = temp.mkdirSync("apm-home-dir-")
       process.env.ATOM_HOME = atomHome
-      process.env.ATOM_ELECTRON_URL = "http://localhost:3000/node"
-      process.env.ATOM_PACKAGES_URL = "http://localhost:3000/packages"
+      process.env.ATOM_ELECTRON_URL = `http://localhost:${port}/node`
+      process.env.ATOM_PACKAGES_URL = `http://localhost:${port}/packages`
       process.env.ATOM_ELECTRON_VERSION = "v10.20.1"
       process.env.ATOM_RESOURCE_PATH = temp.mkdirSync("atom-resource-path-")
 

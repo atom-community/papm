@@ -8,6 +8,7 @@ const express = require("express")
 const http = require("http")
 const apm = require("../lib/apm-cli")
 import Docs from "../lib/docs"
+import findFreePort from "find-port-free-sync"
 
 describe("apm docs", function () {
   let server = null
@@ -24,8 +25,9 @@ describe("apm docs", function () {
     server = http.createServer(app)
 
     let live = false
-    server.listen(3000, "127.0.0.1", function () {
-      process.env.ATOM_PACKAGES_URL = "http://localhost:3000"
+    const port = findFreePort()
+    server.listen(port, "127.0.0.1", function () {
+      process.env.ATOM_PACKAGES_URL = `http://localhost:${port}`
       return (live = true)
     })
     waitsFor(() => live)

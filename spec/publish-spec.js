@@ -10,6 +10,7 @@ const temp = require("temp")
 const express = require("express")
 const http = require("http")
 import * as apm from "../lib/apm-cli"
+import findFreePort from "find-port-free-sync"
 
 describe("apm publish", function () {
   let [server] = Array.from([])
@@ -22,10 +23,11 @@ describe("apm publish", function () {
     server = http.createServer(app)
 
     let live = false
-    server.listen(3000, "127.0.0.1", function () {
+    const port = findFreePort()
+    server.listen(port, "127.0.0.1", function () {
       const atomHome = temp.mkdirSync("apm-home-dir-")
       process.env.ATOM_HOME = atomHome
-      process.env.ATOM_API_URL = "http://localhost:3000/api"
+      process.env.ATOM_API_URL = `http://localhost:${port}/api`
       process.env.ATOM_RESOURCE_PATH = temp.mkdirSync("atom-resource-path-")
       return (live = true)
     })

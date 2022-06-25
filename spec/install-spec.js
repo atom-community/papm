@@ -14,6 +14,7 @@ const wrench = require("wrench")
 import * as apm from "../lib/apm-cli"
 import Install from "../lib/install"
 import { sync as resolveSync } from "resolve"
+import findFreePort from "find-port-free-sync"
 
 describe("apm install", function () {
   let [atomHome, resourcePath] = Array.from([])
@@ -98,13 +99,14 @@ describe("apm install", function () {
       server = http.createServer(app)
 
       let live = false
-      server.listen(3000, "127.0.0.1", function () {
+      const port = findFreePort()
+      server.listen(port, "127.0.0.1", function () {
         atomHome = temp.mkdirSync("apm-home-dir-")
         process.env.ATOM_HOME = atomHome
-        process.env.ATOM_ELECTRON_URL = "http://localhost:3000/node"
-        process.env.ATOM_PACKAGES_URL = "http://localhost:3000/packages"
+        process.env.ATOM_ELECTRON_URL = `http://localhost:${port}/node`
+        process.env.ATOM_PACKAGES_URL = `http://localhost:${port}/packages`
         process.env.ATOM_ELECTRON_VERSION = "v10.20.1"
-        process.env.npm_config_registry = "http://localhost:3000/"
+        process.env.npm_config_registry = `http://localhost:${port}/`
         return (live = true)
       })
       waitsFor(() => live)
