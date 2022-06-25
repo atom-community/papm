@@ -144,12 +144,12 @@ Run \`apm help <command>\` to see the more details about a specific command.\
   return options
 }
 
-function showHelp(options: CliOptions, cmd: Command & { help: () => string }) {
+function showHelp(options: CliOptions, cmd?: Command & { help: () => string }) {
   if (options == null) {
     return
   }
 
-  let help = typeof options.help !== "function" ? cmd.help() /* mri */ : options.help() /* yargs */
+  let help = typeof options.help !== "function" ? cmd?.help() /* mri */ : options.help() /* yargs */
   if (help.indexOf("Options:") >= 0) {
     help += "\n  Prefix an option with `no-` to set it to false such as --no-color to disable"
     help += "\n  colored output."
@@ -334,7 +334,14 @@ export function run(args: string[], callback: RunCallback) {
   } else if (command) {
     if (command === "help") {
       if ((Command = commands[options.commandArgs]?.())) {
-        showHelp(new Command().parseOptions?.(options.commandArgs))
+        const cmd = new Command()
+        if (typeof cmd.help === "function") {
+          // converted to mri
+          showHelp(cmd.parseOptions?.(args), cmd)
+        } else {
+          // yargs
+          showHelp(cmd.parseOptions?.(options.commandArgs), cmd)
+        }
       } else {
         showHelp(options)
       }
