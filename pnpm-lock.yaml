@@ -49,7 +49,7 @@ importers:
       node-gyp: ^9.0.0
       npm: ^7.24.2
       open: 7.4.2
-      pnpm: ^6.32.23
+      pnpm: ^7.0.0
       prettier: ^2.7.1
       prettier-config-atomic: ^3.0.10
       q: ~1.5.1
@@ -124,7 +124,7 @@ importers:
       jasmine-focused: 1.0.7
       node-downloader-helper: 2.1.1
       node-gyp: 9.0.0
-      pnpm: 6.32.23
+      pnpm: 7.3.0
       prettier: 2.7.1
       prettier-config-atomic: 3.0.10
       shx: 0.3.4
@@ -5891,9 +5891,9 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /pnpm/6.32.23:
-    resolution: {integrity: sha512-9fNpN2TmR1zBozE748it2M95BczJQkl/OsWFnlGvynTLzjEPtOlj6O+j86UwafJyCvbfa5bSzk3AyNdeu5Y2sA==}
-    engines: {node: '>=12.17'}
+  /pnpm/7.3.0:
+    resolution: {integrity: sha512-HOXT6V+AznAyjL2Ay3TuuJQucsEguUiKjqyQq4WPPwOpaaILhkKvu8Nn1/OQWGi9V6T7OciyrctAKeYyCha6Ow==}
+    engines: {node: '>=14.6'}
     hasBin: true
     dev: true
 
