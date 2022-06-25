@@ -27,7 +27,10 @@ export default class Disable extends Command {
 
 Usage: apm disable [<package_name>]...
 
-Disables the named package(s).\
+Disables the named package(s).
+
+Options
+-h, --help Print this usage message
 `
   }
 

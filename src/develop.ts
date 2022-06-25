@@ -20,9 +20,9 @@ import mri from "mri"
 
 export default class Develop extends Command {
   parseOptions(argv: string[]) {
-    return mri<{ help: boolean; _: string[] }>(argv, {
+    return mri<{ help: boolean; json: boolean; _: string[] }>(argv, {
       alias: { h: "help" },
-      boolean: "help",
+      boolean: ["help", "json"],
     })
   }
 
@@ -42,6 +42,7 @@ Once this command completes you can open a dev window from atom using
 cmd-shift-o to run the package out of the newly cloned repository.
 
 Options
+--json logging
 -h, --help Print this usage message
 `
   }
@@ -68,18 +69,23 @@ Options
     })
   }
 
-  cloneRepository(repoUrl: string, packageDirectory: string, options: CliOptions, callback = function () {}) {
+  cloneRepository(
+    repoUrl: string,
+    packageDirectory: string,
+    options: ReturnType<Develop["parseOptions"]>,
+    callback = function () {}
+  ) {
     return config.getSetting("git", (command) => {
       if (command == null) {
         command = "git"
       }
       const args = ["clone", "--recursive", repoUrl, packageDirectory]
-      if (!options.argv.json) {
+      if (!options.json) {
         process.stdout.write(`Cloning ${repoUrl} `)
       }
       git.addGitToEnv(process.env)
       return this.spawn(command, args, (...logargs: LogCommandResultsArgs) => {
-        if (options.argv.json) {
+        if (options.json) {
           return this.logCommandResultsIfFail(callback, ...logargs)
         } else {
           return this.logCommandResults(callback, ...logargs)
@@ -120,7 +126,7 @@ Options
           return callback(error)
         } else {
           const tasks = []
-          tasks.push((cb) => this.cloneRepository(repoUrl, packageDirectory, givenOptions, cb))
+          tasks.push((cb) => this.cloneRepository(repoUrl, packageDirectory, options, cb))
 
           tasks.push((cb) => this.installDependencies(packageDirectory, givenOptions, cb))
 
