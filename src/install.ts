@@ -50,6 +50,7 @@ export default class Install extends Command {
       alias: { h: "help", c: "compatible", s: "silent", q: "quiet" },
       boolean: ["help", "silent", "quiet", "check", "verbose", "production", "json"],
       string: ["package", "compatible", "packages-file"],
+      default: { verbose: false },
     })
   }
 

@@ -72,7 +72,7 @@ export default class List extends Command {
         "packages",
         "versions",
       ],
-      default: { versions: true },
+      default: { versions: true, links: true, dev: true },
     })
   }
 
@@ -167,7 +167,7 @@ Options:
   listPackages(directoryPath: string, options: ReturnType<List["parseOptions"]>) {
     const packages = []
     for (const child of fs.list(directoryPath)) {
-      let manifestPath
+      let manifestPath: string
       if (!fs.isDirectorySync(path.join(directoryPath, child))) {
         continue
       }
@@ -180,7 +180,7 @@ Options:
         }
       }
 
-      let manifest = null
+      let manifest: PackageMetadata | null = null
       if ((manifestPath = CSON.resolve(path.join(directoryPath, child, "package")))) {
         try {
           manifest = CSON.readFileSync(manifestPath)
