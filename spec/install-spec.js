@@ -408,10 +408,6 @@ describe("apm install", function () {
 
     describe("when --check is specified", () =>
       it("compiles a sample native module", function () {
-        if (process.platform === "win32") {
-          console.warn("Test skipped on windows") // TODO
-          return
-        }
         const callback = jasmine.createSpy("callback")
         apm.run(["install", "--check"], callback)
 
