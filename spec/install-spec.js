@@ -607,7 +607,7 @@ describe("apm install", function () {
       })
     })
 
-    describe("when installing a registred package and --json is specified", function () {
+    describe("when installing a registered package and --json is specified", function () {
       beforeEach(function () {
         const callback = jasmine.createSpy("callback")
 
@@ -629,30 +629,8 @@ describe("apm install", function () {
       })
     })
 
-    describe("with a space in node-gyp's path", function () {
-      const nodeModules = fs.realpathSync(path.join(__dirname, "..", "node_modules"))
-
-      beforeEach(function () {
-        // Normally npm_config_node_gyp would be ignored, but it works here because we're calling apm
-        // directly and not through the scripts in bin/
-        const nodeGypPath = path.dirname(path.dirname(resolveSync("node-gyp"))) // find an installed node-gyp
-        fs.copySync(nodeGypPath, path.join(nodeModules, "with a space"))
-        process.env.npm_config_node_gyp = path.join(nodeModules, "with a space", "bin", "node-gyp.js")
-
-        // Read + execute permission
-        return fs.chmodSync(process.env.npm_config_node_gyp, fs.constants.S_IRUSR | fs.constants.S_IXUSR)
-      })
-
-      afterEach(function () {
-        delete process.env.npm_config_node_gyp
-        return fs.removeSync(path.join(nodeModules, "with a space"))
-      })
-
+    describe("with the bundled node-gyp", function () {
       it("builds native code successfully", function () {
-        if (process.platform === "win32") {
-          console.warn("Test skipped on windows") // TODO
-          return
-        }
         const callback = jasmine.createSpy("callback")
         apm.run(["install", "native-package"], callback)
 
