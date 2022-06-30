@@ -6,30 +6,40 @@
 import path from "path"
 import async from "async"
 import CSON from "season"
-import yargs from "yargs"
-
 import * as auth from "./auth"
 import Command from "./command"
 import * as config from "./apm"
 import fs from "./fs"
 import * as request from "./request"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
+
+type UninstallOptions = {
+  packageName: string
+  packageVersion: string
+}
 
 export default class Uninstall extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
-
-Usage: apm uninstall <package_name>...
-
-Delete the installed package(s) from the ~/.atom/packages directory.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.alias("d", "dev").boolean("dev").describe("dev", "Uninstall from ~/.atom/dev/packages")
-    return options.boolean("hard").describe("hard", "Uninstall from ~/.atom/packages and ~/.atom/dev/packages")
+    return mri<{ help: boolean; dev: boolean; hard: boolean; _: string[] }>(argv, {
+      alias: { h: "help", d: "dev" },
+      boolean: ["help", "dev", "hard"],
+    })
   }
 
-  getPackageVersion(packageDirectory) {
+  help() {
+    return `Usage: apm uninstall <package_name>...
+
+Delete the installed package(s) from the ~/.atom/packages directory.
+
+Options:
+  --hard      Uninstall from ~/.atom/packages and ~/.atom/dev/packages                     [boolean]
+  -d, --dev   Uninstall from ~/.atom/dev/packages                                          [boolean]
+  -h, --help  Print this usage message
+`
+  }
+
+  getPackageVersion(packageDirectory: string): string | null {
     try {
       return CSON.readFileSync(path.join(packageDirectory, "package.json"))?.version
     } catch (error) {
@@ -37,12 +47,12 @@ Delete the installed package(s) from the ~/.atom/packages directory.\
     }
   }
 
-  registerUninstall({ packageName, packageVersion }, callback) {
+  registerUninstall({ packageName, packageVersion }: UninstallOptions, callback: () => void) {
     if (!packageVersion) {
       return callback()
     }
 
-    return auth.getToken(function (error, token) {
+    return auth.getToken(function (_error, token: string) {
       if (!token) {
         return callback()
       }
@@ -59,17 +69,17 @@ Delete the installed package(s) from the ~/.atom/packages directory.\
     })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
-    const packageNames = this.packageNamesFromArgv(options.argv)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const packageNames = this.packageNamesFromArgv(options)
 
     if (packageNames.length === 0) {
       callback("Please specify a package name to uninstall")
       return
     }
 
-    const uninstallsToRegister = []
-    let uninstallError = null
+    const uninstallsToRegister: UninstallOptions[] = []
+    let uninstallError: Error | null = null
 
     for (let packageName of packageNames) {
       if (packageName === ".") {
@@ -77,8 +87,8 @@ Delete the installed package(s) from the ~/.atom/packages directory.\
       }
       process.stdout.write(`Uninstalling ${packageName} `)
       try {
-        let packageDirectory
-        if (!options.argv.dev) {
+        let packageDirectory: string
+        if (!options.dev) {
           packageDirectory = path.join(this.atomPackagesDirectory, packageName)
           const packageManifestPath = path.join(packageDirectory, "package.json")
           if (fs.existsSync(packageManifestPath)) {
@@ -87,16 +97,16 @@ Delete the installed package(s) from the ~/.atom/packages directory.\
             if (packageVersion) {
               uninstallsToRegister.push({ packageName, packageVersion })
             }
-          } else if (!options.argv.hard) {
+          } else if (!options.hard) {
             throw new Error(`No package.json found at ${packageManifestPath}`)
           }
         }
 
-        if (options.argv.hard || options.argv.dev) {
+        if (options.hard || options.dev) {
           packageDirectory = path.join(this.atomDevPackagesDirectory, packageName)
           if (fs.existsSync(packageDirectory)) {
             fs.removeSync(packageDirectory)
-          } else if (!options.argv.hard) {
+          } else if (!options.hard) {
             throw new Error("Does not exist")
           }
         }
