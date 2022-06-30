@@ -92,11 +92,11 @@ export default class Command {
     return this.spawn(process.execPath, args, ...Array.from(remaining))
   }
 
-  packageNamesFromArgv(argv) {
+  packageNamesFromArgv(argv: { _: string[] }): string[] {
     return this.sanitizePackageNames(argv._)
   }
 
-  sanitizePackageNames(packageNames: string[] = []) {
+  sanitizePackageNames(packageNames: string[] = []): string[] {
     packageNames = packageNames.map((packageName) => packageName.trim())
     return _.compact(_.uniq(packageNames))
   }

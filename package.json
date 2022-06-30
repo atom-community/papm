@@ -44,6 +44,7 @@
   "dependencies": {
     "@aminya/underscore-plus": "^1.9.0",
     "@atom/plist": "0.4.4",
+    "@types/mri": "^1.1.1",
     "asar-require": "0.3.0",
     "async": "^3.2.0",
     "colors": "~1.4.0",
@@ -53,6 +54,7 @@
     "glob": "^7.1.7",
     "hosted-git-info": "^3.0.8",
     "keytar": "^7.7.0",
+    "mri": "^1.1.6",
     "mv": "2.1.1",
     "ncp": "~2.0.0",
     "node-gyp": "^9.0.0",

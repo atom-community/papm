@@ -6,19 +6,26 @@
  */
 import path from "path"
 import async from "async"
-import yargs from "yargs"
 import Command from "./command"
 import * as config from "./apm"
 import fs from "./fs"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class RebuildModuleCache extends Command {
-  moduleCache?: any
+  moduleCache?: { create: (arg0: string) => void }
 
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{
+      help: boolean
+    }>(argv, {
+      alias: { h: "help" },
+      boolean: ["help"],
+    })
+  }
 
+  help() {
+    return `
 Usage: apm rebuild-module-cache
 
 Rebuild the module cache for all the packages installed to
@@ -27,9 +34,11 @@ Rebuild the module cache for all the packages installed to
 You can see the state of the module cache for a package by looking
 at the _atomModuleCache property in the package's package.json file.
 
-This command skips all linked packages.\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+This command skips all linked packages.
+
+Options:
+  -h, --help  Print this usage messag
+`
   }
 
   getResourcePath(callback: Function) {
@@ -58,8 +67,8 @@ This command skips all linked packages.\
     })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    const commands = []
+  run(_options: CliOptions, callback: RunCallback) {
+    const commands: Function[] = []
     fs.list(this.atomPackagesDirectory).forEach((packageName) => {
       const packageDirectory = path.join(this.atomPackagesDirectory, packageName)
       if (fs.isSymbolicLinkSync(packageDirectory)) {

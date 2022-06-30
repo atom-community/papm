@@ -4,23 +4,31 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import path from "path"
-import yargs from "yargs"
 import Command from "./command"
 import fs from "./fs"
 import { tree } from "./tree"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Links extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{
+      help: boolean
+    }>(argv, {
+      alias: { h: "help" },
+      boolean: ["help"],
+    })
+  }
 
-Usage: apm links
+  help() {
+    return `Usage: apm links
 
 List all of the symlinked atom packages in ~/.atom/packages and
-~/.atom/dev/packages.\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+~/.atom/dev/packages.
+
+Options:
+  -h, --help  Print this usage message
+`
   }
 
   getDevPackagePath(packageName: string) {
@@ -42,7 +50,7 @@ List all of the symlinked atom packages in ~/.atom/packages and
     return symlinks
   }
 
-  logLinks(directoryPath) {
+  logLinks(directoryPath: string) {
     const links = this.getSymlinks(directoryPath)
     console.log(`${directoryPath.cyan} (${links.length})`)
     return tree(links, { emptyMessage: "(no links)" }, function (link) {
@@ -56,7 +64,7 @@ List all of the symlinked atom packages in ~/.atom/packages and
     })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  run(_options: CliOptions, callback: RunCallback) {
     this.logLinks(this.atomDevPackagesDirectory)
     this.logLinks(this.atomPackagesDirectory)
     return callback()

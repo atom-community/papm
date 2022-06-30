@@ -8,31 +8,35 @@
 import * as _ from "@aminya/underscore-plus"
 import path from "path"
 import CSON from "season"
-import yargs from "yargs"
 import * as config from "./apm"
 import Command from "./command"
 import List from "./list"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Disable extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{ help: boolean; _: string[] }>(argv, {
+      alias: { h: "help" },
+      boolean: "help",
+    })
+  }
 
-Usage: apm disable [<package_name>]...
+  help() {
+    return `Usage: apm disable [<package_name>]...
 
-Disables the named package(s).\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+Disables the named package(s).
+
+Options:
+  -h, --help  Print this usage message
+`
   }
 
   getInstalledPackages(callback) {
     const options = {
-      argv: {
-        theme: false,
-        bare: true,
-      },
-    }
+      theme: false,
+      bare: true,
+    } as ReturnType<List["parseOptions"]>
 
     const lister = new List()
     return lister.listBundledPackages(options, (error, core_packages) =>
@@ -44,11 +48,10 @@ Disables the named package(s).\
     )
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  run(givenOptions: CliOptions, callback: RunCallback) {
     let settings
-    options = this.parseOptions(options.commandArgs)
-
-    let packageNames = this.packageNamesFromArgv(options.argv)
+    const options = this.parseOptions(givenOptions.commandArgs)
+    let packageNames = this.packageNamesFromArgv(options)
 
     const configFilePath = CSON.resolve(path.join(config.getAtomDirectory(), "config"))
     if (!configFilePath) {
@@ -58,8 +61,7 @@ Disables the named package(s).\
 
     try {
       settings = CSON.readFileSync(configFilePath)
-    } catch (error1) {
-      const error = error1
+    } catch (error) {
       callback(`Failed to load \`${configFilePath}\`: ${error.message}`)
       return
     }

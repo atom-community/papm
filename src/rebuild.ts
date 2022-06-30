@@ -1,31 +1,39 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import yargs from "yargs"
 import * as config from "./apm"
 import Command from "./command"
 import fs from "./fs"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Rebuild extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{
+      help: boolean
+      _: string[]
+    }>(argv, {
+      alias: { h: "help" },
+      boolean: ["help"],
+    })
+  }
 
-Usage: apm rebuild [<name> [<name> ...]]
+  help() {
+    return `Usage: apm rebuild [<name> [<name> ...]]
 
 Rebuild the given modules currently installed in the node_modules folder
 in the current working directory.
 
-All the modules will be rebuilt if no module names are specified.\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+All the modules will be rebuilt if no module names are specified.
+
+Options:
+  -h, --help  Print this usage message
+`
   }
 
-  forkNpmRebuild(options, callback) {
+  forkNpmRebuild(options: ReturnType<Rebuild["parseOptions"]>, callback) {
     process.stdout.write("Rebuilding modules ")
 
     const rebuildArgs = [
@@ -35,8 +43,8 @@ All the modules will be rebuilt if no module names are specified.\
       config.getUserConfigPath(),
       "rebuild",
     ]
-    rebuildArgs.push(...Array.from(this.getNpmBuildFlags() || []))
-    rebuildArgs.push(...Array.from(options.argv._ || []))
+    rebuildArgs.push(...this.getNpmBuildFlags())
+    rebuildArgs.push(...options._)
 
     fs.makeTreeSync(this.atomDirectory)
 
@@ -46,8 +54,8 @@ All the modules will be rebuilt if no module names are specified.\
     return this.fork(this.atomNpmPath, rebuildArgs, { env }, callback)
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
 
     return config.loadNpm((error, npm) => {
       this.npm = npm

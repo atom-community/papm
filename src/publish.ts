@@ -1,13 +1,11 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import path from "path"
 import url from "url"
-import yargs from "yargs"
 import Git from "git-utils"
 import semver from "semver"
 import fs from "./fs"
@@ -16,14 +14,27 @@ import Command, { LogCommandResultsArgs } from "./command"
 import Login from "./login"
 import * as Packages from "./packages"
 import * as request from "./request"
+import mri from "mri"
+import { CliOptions } from "./apm-cli"
 
 export default class Publish extends Command {
   userConfigPath = config.getUserConfigPath()
-  parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
 
-Usage: apm publish [<newversion> | major | minor | patch | build]
+  parseOptions(argv: string[]) {
+    return mri<{
+      help: boolean
+      tag: string
+      rename: string
+      _: string[]
+    }>(argv, {
+      alias: { h: "help", t: "tag", r: "rename" },
+      boolean: ["help"],
+      string: ["tag", "rename"],
+    })
+  }
+
+  help() {
+    return `Usage: apm publish [<newversion> | major | minor | patch | build]
        apm publish --tag <tagname>
        apm publish --rename <new-name>
 
@@ -42,11 +53,13 @@ updated with the new name and the package's name is updated on Atom.io.
 
 Run \`apm featured\` to see all the featured packages or
 \`apm view <packagename>\` to see information about your package after you
-have published it.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.alias("t", "tag").string("tag").describe("tag", "Specify a tag to publish. Must be of the form vx.y.z")
-    return options.alias("r", "rename").string("rename").describe("rename", "Specify a new name for the package")
+have published it.
+
+Options:
+  -h, --help    Print this usage message
+  -t, --tag     Specify a tag to publish. Must be of the form vx.y.z                        [string]
+  -r, --rename  Specify a new name for the package                                          [string]
+`
   }
 
   // Create a new version and tag use the `npm version` command.
@@ -211,7 +224,12 @@ have published it.\
   // tag - The string Git tag of the new version.
   // callback - The callback function to invoke with an error as the first
   //            argument.
-  createPackageVersion(packageName: string, tag: string, options: { rename: boolean }, callback: Function) {
+  createPackageVersion(
+    packageName: string,
+    tag: string,
+    options: ReturnType<Publish["parseOptions"]>,
+    callback: Function
+  ) {
     return Login.getTokenOrLogin(function (error, token) {
       if (error != null) {
         callback(error)
@@ -250,7 +268,7 @@ have published it.\
   // callback - The callback function to invoke when done with an error as the
   //            first argument.
   publishPackage(pack: Packages.PackageMetadata, tag: string, ...remaining) {
-    let options
+    let options: undefined | ReturnType<Publish["parseOptions"]>
     if (remaining.length >= 2) {
       options = remaining.shift()
     }
@@ -426,12 +444,11 @@ have published it.\
   }
 
   // Run the publish command with the given options
-  run(options, callback: Function) {
+  run(givenOptions: CliOptions, callback) {
     let error, pack: Packages.PackageMetadata
-    options = this.parseOptions(options.commandArgs)
-    const { tag } = options.argv
-    let { rename } = options.argv
-    let [version] = Array.from(options.argv._)
+    const options = this.parseOptions(givenOptions.commandArgs)
+    let { tag, rename } = options
+    let version = options._[0]
 
     try {
       pack = this.loadMetadata()
@@ -473,7 +490,7 @@ have published it.\
             return callback(error)
           }
 
-          return this.versionPackage(version, (error, tag) => {
+          return this.versionPackage(version, (error, tag: string) => {
             if (error != null) {
               return callback(error)
             }

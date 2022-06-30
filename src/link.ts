@@ -7,36 +7,49 @@
  */
 import path from "path"
 import CSON from "season"
-import yargs from "yargs"
 import Command from "./command"
 import * as config from "./apm"
 import fs from "./fs"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Link extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{
+      help: boolean
+      dev: boolean
+      name: string
+      _: string[]
+    }>(argv, {
+      alias: { h: "help", d: "dev" },
+      boolean: ["help", "dev"],
+      string: ["name"],
+    })
+  }
 
-Usage: apm link [<package_path>] [--name <package_name>]
+  help() {
+    return `Usage: apm link [<package_path>] [--name <package_name>]
 
 Create a symlink for the package in ~/.atom/packages. The package in the
 current working directory is linked if no path is given.
 
-Run \`apm links\` to view all the currently linked packages.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    return options.alias("d", "dev").boolean("dev").describe("dev", "Link to ~/.atom/dev/packages")
+Run \`apm links\` to view all the currently linked packages.
+
+Options:
+  --name      package name                                                                 [string]
+  -h, --help  Print this usage message
+  -d, --dev   Link to ~/.atom/dev/packages                                                 [boolean]
+`
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    let left, targetPath
-    options = this.parseOptions(options.commandArgs)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    let left: string, targetPath: string
+    const options = this.parseOptions(givenOptions.commandArgs)
 
-    const packagePath = (left = options.argv._[0]?.toString()) != null ? left : "."
+    const packagePath = (left = options._[0]?.toString()) != null ? left : "."
     const linkPath = path.resolve(process.cwd(), packagePath)
 
-    let packageName = options.argv.name
+    let packageName = options.name
     try {
       if (!packageName) {
         packageName = CSON.readFileSync(CSON.resolve(path.join(linkPath, "package"))).name
@@ -48,7 +61,7 @@ Run \`apm links\` to view all the currently linked packages.\
       packageName = path.basename(linkPath)
     }
 
-    if (options.argv.dev) {
+    if (options.dev) {
       targetPath = path.join(config.getAtomDirectory(), "dev", "packages", packageName)
     } else {
       targetPath = path.join(config.getAtomDirectory(), "packages", packageName)

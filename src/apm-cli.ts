@@ -19,6 +19,7 @@ import "asar-require"
 import * as config from "./apm"
 import fs from "./fs"
 import * as git from "./git"
+import Command from "./command"
 
 function setupTempDirectory() {
   const temp = require("temp")
@@ -143,12 +144,12 @@ Run \`apm help <command>\` to see the more details about a specific command.\
   return options
 }
 
-function showHelp(options: CliOptions) {
+function showHelp(options: CliOptions, cmd?: Command & { help: () => string }) {
   if (options == null) {
     return
   }
 
-  let help = options.help()
+  let help = typeof options.help !== "function" ? cmd?.help() /* mri */ : options.help() /* yargs */
   if (help.indexOf("Options:") >= 0) {
     help += "\n  Prefix an option with `no-` to set it to false such as --no-color to disable"
     help += "\n  colored output."
@@ -280,7 +281,7 @@ function getPythonVersion(callback) {
 
 export type RunCallback = (error?: string | Error | null) => any
 
-export function run(args, callback: RunCallback) {
+export function run(args: string[], callback: RunCallback) {
   let Command
   config.setupApmRcFile()
   const options = parseOptions(args)
@@ -313,13 +314,19 @@ export function run(args, callback: RunCallback) {
     return callback?.(error)
   }
 
-  args = options.argv
   const { command } = options
-  if (args.version) {
-    return printVersions(args, handleErrorCallback)
-  } else if (args.help) {
+  if (options.argv.version) {
+    return printVersions(options.argv, handleErrorCallback)
+  } else if (options.argv.help) {
     if ((Command = commands[options.command]?.())) {
-      showHelp(new Command().parseOptions?.(options.command))
+      const cmd = new Command()
+      if (typeof cmd.help === "function") {
+        // converted to mri
+        showHelp(cmd.parseOptions?.(args), cmd)
+      } else {
+        // yargs
+        showHelp(cmd.parseOptions?.(options.command), cmd)
+      }
     } else {
       showHelp(options)
     }
@@ -327,7 +334,14 @@ export function run(args, callback: RunCallback) {
   } else if (command) {
     if (command === "help") {
       if ((Command = commands[options.commandArgs]?.())) {
-        showHelp(new Command().parseOptions?.(options.commandArgs))
+        const cmd = new Command()
+        if (typeof cmd.help === "function") {
+          // converted to mri
+          showHelp(cmd.parseOptions?.(args), cmd)
+        } else {
+          // yargs
+          showHelp(cmd.parseOptions?.(options.commandArgs), cmd)
+        }
       } else {
         showHelp(options)
       }
