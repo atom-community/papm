@@ -97,7 +97,7 @@
     "@types/wordwrap": "1.0.1",
     "@types/wrench": "~0.0.29",
     "@types/yargs": "^17.0.0",
-    "babel-preset-atomic": "^4.2.0",
+    "babel-preset-atomic": "^5.0.0",
     "eslint-config-atomic": "^1.16.2",
     "express": "^4.17.1",
     "gitly": "^2.1.2",
