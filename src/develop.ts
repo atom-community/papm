@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS104: Avoid inline assignments
  * DS207: Consider shorter variations of null checks
@@ -9,7 +8,6 @@
 import fs from "fs"
 import path from "path"
 import async from "async"
-import yargs from "yargs"
 import * as config from "./apm"
 import Command, { LogCommandResultsArgs } from "./command"
 import Install from "./install"
@@ -18,13 +16,18 @@ import Link from "./link"
 import * as request from "./request"
 import { PackageMetadata, unkownPackage } from "./packages"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Develop extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
+    return mri<{ help: boolean; json: boolean; _: string[] }>(argv, {
+      alias: { h: "help" },
+      boolean: ["help", "json"],
+    })
+  }
 
-    options.usage(`\
-Usage: apm develop <package_name> [<directory>]
+  help() {
+    return `Usage: apm develop <package_name> [<directory>]
 
 Clone the given package's Git repository to the directory specified,
 install its dependencies, and link it for development to
@@ -35,9 +38,12 @@ If no directory is specified then the repository is cloned to
 be overridden using the ATOM_REPOS_HOME environment variable.
 
 Once this command completes you can open a dev window from atom using
-cmd-shift-o to run the package out of the newly cloned repository.\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+cmd-shift-o to run the package out of the newly cloned repository.
+
+Options:
+  -h, --help  Print this usage message
+  --json      Logging
+`
   }
 
   getRepositoryUrl(packageName: string, callback) {
@@ -62,18 +68,23 @@ cmd-shift-o to run the package out of the newly cloned repository.\
     })
   }
 
-  cloneRepository(repoUrl: string, packageDirectory: string, options: CliOptions, callback = function () {}) {
+  cloneRepository(
+    repoUrl: string,
+    packageDirectory: string,
+    options: ReturnType<Develop["parseOptions"]>,
+    callback: (err?: string) => any = function () {}
+  ) {
     return config.getSetting("git", (command) => {
       if (command == null) {
         command = "git"
       }
       const args = ["clone", "--recursive", repoUrl, packageDirectory]
-      if (!options.argv.json) {
+      if (!options.json) {
         process.stdout.write(`Cloning ${repoUrl} `)
       }
       git.addGitToEnv(process.env)
       return this.spawn(command, args, (...logargs: LogCommandResultsArgs) => {
-        if (options.argv.json) {
+        if (options.json) {
           return this.logCommandResultsIfFail(callback, ...logargs)
         } else {
           return this.logCommandResults(callback, ...logargs)
@@ -89,26 +100,25 @@ cmd-shift-o to run the package out of the newly cloned repository.\
     return new Install().run(installOptions, callback)
   }
 
-  linkPackage(packageDirectory: string, options, callback = function () {}) {
+  linkPackage(packageDirectory: string, options: CliOptions, callback = function () {}) {
     const linkOptions = { ...options }
     linkOptions.commandArgs = [packageDirectory, "--dev"]
     return new Link().run(linkOptions, callback)
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    let left: string
-    const packageName = options.commandArgs.shift()
-
-    if (packageName?.length <= 0) {
-      return callback("Missing required package name")
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const packageNames = this.packageNamesFromArgv(options)
+    if (packageNames.length === 0) {
+      return callback("One package name should be specified")
     }
-
-    let packageDirectory: string =
-      (left = options.commandArgs.shift()) != null ? left : path.join(config.getReposDirectory(), packageName)
-    packageDirectory = path.resolve(packageDirectory)
+    const packageName = packageNames[0]
+    const packageDirectory = path.resolve(
+      packageNames[1] ? packageNames[1] : path.join(config.getReposDirectory(), packageName)
+    )
 
     if (fs.existsSync(packageDirectory)) {
-      return this.linkPackage(packageDirectory, options, callback)
+      return this.linkPackage(packageDirectory, givenOptions, callback)
     } else {
       return this.getRepositoryUrl(packageName, (error, repoUrl: string) => {
         if (error != null) {
@@ -117,9 +127,9 @@ cmd-shift-o to run the package out of the newly cloned repository.\
           const tasks = []
           tasks.push((cb) => this.cloneRepository(repoUrl, packageDirectory, options, cb))
 
-          tasks.push((cb) => this.installDependencies(packageDirectory, options, cb))
+          tasks.push((cb) => this.installDependencies(packageDirectory, givenOptions, cb))
 
-          tasks.push((cb) => this.linkPackage(packageDirectory, options, cb))
+          tasks.push((cb) => this.linkPackage(packageDirectory, givenOptions, cb))
 
           return async.waterfall(tasks, callback)
         }

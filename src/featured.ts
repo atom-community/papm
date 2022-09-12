@@ -6,33 +6,37 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import * as _ from "@aminya/underscore-plus"
-import yargs from "yargs"
 import Command from "./command"
 import * as config from "./apm"
 import * as request from "./request"
 import { tree } from "./tree"
 import type { CliOptions, RunCallback } from "./apm-cli"
 import { PackageData } from "./stars"
+import mri from "mri"
 
 export default class Featured extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{ help: boolean; print: boolean; themes: boolean; json: boolean; compatible: string }>(argv, {
+      alias: { h: "help", p: "print", t: "themes", c: "compatible" },
+      boolean: ["help", "print", "themes", "json"],
+      string: ["compatible"],
+    })
+  }
 
-Usage: apm featured
+  help() {
+    return `Usage: apm featured
        apm featured --themes
        apm featured --compatible 0.49.0
 
 List the Atom packages and themes that are currently featured in the
-atom.io registry.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.alias("t", "themes").boolean("themes").describe("themes", "Only list themes")
-    options
-      .alias("c", "compatible")
-      .string("compatible")
-      .describe("compatible", "Only list packages/themes compatible with this Atom version")
-    return options.boolean("json").describe("json", "Output featured packages as JSON array")
+atom.io registry.
+
+Options:
+  --json            Output featured packages as JSON array                                 [boolean]
+  -h, --help        Print this usage message
+  -t, --themes      Only list themes                                                       [boolean]
+  -c, --compatible  Only list packages/themes compatible with this Atom version             [string]
+`
   }
 
   getFeaturedPackagesByType(atomVersion, packageType, callback) {
@@ -83,18 +87,18 @@ atom.io registry.\
     })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
 
     const listCallback = function (error, packages: PackageData[]) {
       if (error != null) {
         return callback(error)
       }
 
-      if (options.argv.json) {
+      if (options.json) {
         console.log(JSON.stringify(packages))
       } else {
-        if (options.argv.themes) {
+        if (options.themes) {
           console.log(`${"Featured Atom Themes".cyan} (${packages.length})`)
         } else {
           console.log(`${"Featured Atom Packages".cyan} (${packages.length})`)
@@ -121,10 +125,10 @@ atom.io registry.\
       return callback()
     }
 
-    if (options.argv.themes) {
-      return this.getFeaturedPackagesByType(options.argv.compatible, "themes", listCallback)
+    if (options.themes) {
+      return this.getFeaturedPackagesByType(options.compatible, "themes", listCallback)
     } else {
-      return this.getAllFeaturedPackages(options.argv.compatible, listCallback)
+      return this.getAllFeaturedPackages(options.compatible, listCallback)
     }
   }
 }

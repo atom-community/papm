@@ -9,7 +9,6 @@ import path from "path"
 import * as _ from "@aminya/underscore-plus"
 import async from "async"
 import CSON from "season"
-import yargs from "yargs"
 import * as config from "./apm"
 import Command from "./command"
 import fs from "./fs"
@@ -17,23 +16,39 @@ import Login from "./login"
 import * as Packages from "./packages"
 import * as request from "./request"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
+
+type StarOptions = {
+  ignoreUnpublishedPackages: boolean
+  token: string
+}
 
 export default class Star extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{ help: boolean; installed: boolean; _: string[] }>(argv, {
+      alias: { h: "help" },
+      boolean: ["help", "installed"],
+    })
+  }
 
-Usage: apm star <package_name>...
+  help() {
+    return `Usage: apm star <package_name>...
 
 Star the given packages on https://atom.io
 
-Run \`apm stars\` to see all your starred packages.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    return options.boolean("installed").describe("installed", "Star all packages in ~/.atom/packages")
+Run \`apm stars\` to see all your starred packages.
+
+Options:
+  --installed  Star all packages in ~/.atom/packages                                       [boolean]
+  -h, --help   Print this usage message
+`
   }
 
-  starPackage(packageName, { ignoreUnpublishedPackages, token } = {}, callback) {
+  starPackage(packageName: string, starOptions: StarOptions | {} = {}, callback: (err?: string) => void) {
+    const ignoreUnpublishedPackages =
+      "ignoreUnpublishedPackages" in starOptions ? starOptions.ignoreUnpublishedPackages : undefined
+    const token = "token" in starOptions ? starOptions.token : undefined
+
     if (process.platform === "darwin") {
       process.stdout.write("\u2B50  ")
     }
@@ -63,20 +78,19 @@ Run \`apm stars\` to see all your starred packages.\
     })
   }
 
-  getInstalledPackageNames() {
-    const installedPackages = []
+  getInstalledPackageNames(): string[] {
+    const installedPackages: string[] = []
     const userPackagesDirectory = path.join(config.getAtomDirectory(), "packages")
     for (const child of fs.list(userPackagesDirectory)) {
-      let manifestPath
+      let manifestPath: string
       if (!fs.isDirectorySync(path.join(userPackagesDirectory, child))) {
         continue
       }
 
       if ((manifestPath = CSON.resolve(path.join(userPackagesDirectory, child, "package")))) {
         try {
-          let left
-          const metadata = (left = CSON.readFileSync(manifestPath)) != null ? left : {}
-          if (metadata.name && Packages.getRepository(metadata)) {
+          const metadata: Packages.PackageMetadata | {} = CSON.readFileSync(manifestPath) || {}
+          if ("name" in metadata && Packages.getRepository(metadata)) {
             installedPackages.push(metadata.name)
           }
         } catch (error) {
@@ -88,18 +102,18 @@ Run \`apm stars\` to see all your starred packages.\
     return _.uniq(installedPackages)
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    let packageNames
-    options = this.parseOptions(options.commandArgs)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
 
-    if (options.argv.installed) {
+    let packageNames: string[]
+    if (options.installed) {
       packageNames = this.getInstalledPackageNames()
       if (packageNames.length === 0) {
         callback()
         return
       }
     } else {
-      packageNames = this.packageNamesFromArgv(options.argv)
+      packageNames = this.packageNamesFromArgv(options)
       if (packageNames.length === 0) {
         callback("Please specify a package name to star")
         return
@@ -112,7 +126,7 @@ Run \`apm stars\` to see all your starred packages.\
       }
 
       const starOptions = {
-        ignoreUnpublishedPackages: options.argv.installed,
+        ignoreUnpublishedPackages: options.installed,
         token,
       }
 

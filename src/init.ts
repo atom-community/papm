@@ -6,19 +6,32 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import path from "path"
-import yargs from "yargs"
 import Command from "./command"
 import fs from "./fs"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 const supportedSyntaxes = ["coffeescript", "javascript"]
 
 export default class Init extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
+    return mri<{
+      help: boolean
+      package: string
+      syntax: string
+      theme: string
+      convert: string
+      template: string
+      language: string
+    }>(argv, {
+      alias: { h: "help", p: "package", s: "syntax", t: "theme", l: "language", c: "convert" },
+      boolean: ["help"],
+      string: ["package", "syntax", "theme", "language", "convert", "template"],
+    })
+  }
 
-    options.usage(`\
-Usage:
+  help() {
+    return `Usage:
   apm init -p <package-name>
   apm init -p <package-name> --syntax <javascript-or-coffeescript>
   apm init -p <package-name> -c ~/Downloads/r.tmbundle
@@ -33,65 +46,61 @@ Usage:
   apm init -l <language-name>
 
 Generates code scaffolding for either a theme or package depending
-on the option selected.\
-`)
-    options.alias("p", "package").string("package").describe("package", "Generates a basic package")
-    options
-      .alias("s", "syntax")
-      .string("syntax")
-      .describe("syntax", "Sets package syntax to CoffeeScript or JavaScript")
-    options.alias("t", "theme").string("theme").describe("theme", "Generates a basic theme")
-    options.alias("l", "language").string("language").describe("language", "Generates a basic language package")
-    options
-      .alias("c", "convert")
-      .string("convert")
-      .describe("convert", "Path or URL to TextMate bundle/theme to convert")
-    options.alias("h", "help").describe("help", "Print this usage message")
-    return options.string("template").describe("template", "Path to the package or theme template")
+on the option selected.
+
+Options:
+  --template      Path to the package or theme template                                     [string]
+  -p, --package   Generates a basic package                                                 [string]
+  -s, --syntax    Sets package syntax to CoffeeScript or JavaScript                         [string]
+  -t, --theme     Generates a basic theme                                                   [string]
+  -l, --language  Generates a basic language package                                        [string]
+  -c, --convert   Path or URL to TextMate bundle/theme to convert                           [string]
+  -h, --help      Print this usage message
+`
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  run(givenOptions: CliOptions, callback: RunCallback) {
     let templatePath
-    options = this.parseOptions(options.commandArgs)
-    if (options.argv.package?.length > 0) {
-      if (options.argv.convert) {
-        return this.convertPackage(options.argv.convert, options.argv.package, callback)
+    const options = this.parseOptions(givenOptions.commandArgs)
+    if (options.package?.length > 0) {
+      if (options.convert) {
+        return this.convertPackage(options.convert, options.package, callback)
       } else {
-        const packagePath = path.resolve(options.argv.package)
-        const syntax = options.argv.syntax || supportedSyntaxes[0]
+        const packagePath = path.resolve(options.package)
+        const syntax = options.syntax || supportedSyntaxes[0]
         if (!supportedSyntaxes.includes(syntax)) {
           return callback(`You must specify one of ${supportedSyntaxes.join(", ")} after the --syntax argument`)
         }
-        templatePath = this.getTemplatePath(options.argv, `package-${syntax}`)
+        templatePath = this.getTemplatePath(options.template, `package-${syntax}`)
         this.generateFromTemplate(packagePath, templatePath)
         return callback()
       }
-    } else if (options.argv.theme?.length > 0) {
-      if (options.argv.convert) {
-        return this.convertTheme(options.argv.convert, options.argv.theme, callback)
+    } else if (options.theme?.length > 0) {
+      if (options.convert) {
+        return this.convertTheme(options.convert, options.theme, callback)
       } else {
-        const themePath = path.resolve(options.argv.theme)
-        templatePath = this.getTemplatePath(options.argv, "theme")
+        const themePath = path.resolve(options.theme)
+        templatePath = this.getTemplatePath(options.template, "theme")
         this.generateFromTemplate(themePath, templatePath)
         return callback()
       }
-    } else if (options.argv.language?.length > 0) {
-      let languagePath = path.resolve(options.argv.language)
+    } else if (options.language?.length > 0) {
+      let languagePath = path.resolve(options.language)
       const languageName = path.basename(languagePath).replace(/^language-/, "")
       languagePath = path.join(path.dirname(languagePath), `language-${languageName}`)
-      templatePath = this.getTemplatePath(options.argv, "language")
+      templatePath = this.getTemplatePath(options.template, "language")
       this.generateFromTemplate(languagePath, templatePath, languageName)
       return callback()
-    } else if (options.argv.package != null) {
+    } else if (options.package != null) {
       return callback("You must specify a path after the --package argument")
-    } else if (options.argv.theme != null) {
+    } else if (options.theme != null) {
       return callback("You must specify a path after the --theme argument")
     } else {
       return callback("You must specify either --package, --theme or --language to `apm init`")
     }
   }
 
-  convertPackage(sourcePath, destinationPath, callback) {
+  convertPackage(sourcePath: string, destinationPath: string, callback) {
     if (!destinationPath) {
       callback("Specify directory to create package in using --package")
       return
@@ -111,7 +120,7 @@ on the option selected.\
     })
   }
 
-  convertTheme(sourcePath, destinationPath, callback) {
+  convertTheme(sourcePath: string, destinationPath: string, callback: { (error?: string | Error): any }) {
     if (!destinationPath) {
       callback("Specify directory to create theme in using --theme")
       return
@@ -133,7 +142,7 @@ on the option selected.\
     })
   }
 
-  generateFromTemplate(packagePath, templatePath, packageName) {
+  generateFromTemplate(packagePath: string, templatePath: string, packageName?: string) {
     if (packageName == null) {
       packageName = path.basename(packagePath)
     }
@@ -171,11 +180,11 @@ on the option selected.\
     })()
   }
 
-  replacePackageAuthorPlaceholders(string, packageAuthor) {
+  replacePackageAuthorPlaceholders(string: string, packageAuthor: string) {
     return string.replace(/__package-author__/g, packageAuthor)
   }
 
-  replacePackageNamePlaceholders(string, packageName) {
+  replacePackageNamePlaceholders(string: string, packageName: string) {
     const placeholderRegex = /__(?:(package-name)|([Pp]ackageName)|(package_name))__/g
     return (string = string.replace(placeholderRegex, (match, dash, camel, underscore) => {
       if (dash) {
@@ -193,19 +202,19 @@ on the option selected.\
     }))
   }
 
-  replaceCurrentYearPlaceholders(string) {
-    return string.replace("__current_year__", new Date().getFullYear())
+  replaceCurrentYearPlaceholders(string: string): string {
+    return string.replace("__current_year__", String(new Date().getFullYear()))
   }
 
-  getTemplatePath(argv, templateType) {
-    if (argv.template != null) {
-      return path.resolve(argv.template)
+  getTemplatePath(template: string | undefined, templateType: string) {
+    if (template != null) {
+      return path.resolve(template)
     } else {
       return path.resolve(__dirname, "..", "templates", templateType)
     }
   }
 
-  dasherize(string) {
+  dasherize(string: string) {
     string = string[0].toLowerCase() + string.slice(1)
     return string.replace(/([A-Z])|(_)/g, function (m, letter) {
       if (letter) {
@@ -216,11 +225,11 @@ on the option selected.\
     })
   }
 
-  camelize(string) {
+  camelize(string: string) {
     return string.replace(/[_-]+(\w)/g, (m) => m[1].toUpperCase())
   }
 
-  underscore(string) {
+  underscore(string: string) {
     string = string[0].toLowerCase() + string.slice(1)
     return string.replace(/([A-Z])|(-)/g, function (m, letter) {
       if (letter) {

@@ -8,27 +8,33 @@
 import * as _ from "@aminya/underscore-plus"
 import path from "path"
 import CSON from "season"
-import yargs from "yargs"
 import * as config from "./apm"
 import Command from "./command"
 import type { CliOptions, RunCallback } from "./apm-cli"
+import mri from "mri"
 
 export default class Enable extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
-
-Usage: apm enable [<package_name>]...
-
-Enables the named package(s).\
-`)
-    return options.alias("h", "help").describe("help", "Print this usage message")
+    return mri<{ help: boolean; _: string[] }>(argv, {
+      alias: { h: "help" },
+      boolean: "help",
+    })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
+  help() {
+    return `Usage: apm enable [<package_name>]...
+
+Enables the named package(s).
+
+Options:
+  -h, --help  Print this usage message
+`
+  }
+
+  run(givenOptions: CliOptions, callback: RunCallback) {
     let error: Error, left, settings
-    options = this.parseOptions(options.commandArgs)
-    let packageNames = this.packageNamesFromArgv(options.argv)
+    const options = this.parseOptions(givenOptions.commandArgs)
+    let packageNames = this.packageNamesFromArgv(options)
 
     const configFilePath = CSON.resolve(path.join(config.getAtomDirectory(), "config"))
     if (!configFilePath) {

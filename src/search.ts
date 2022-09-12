@@ -1,38 +1,46 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import * as _ from "@aminya/underscore-plus"
-import yargs from "yargs"
 import Command from "./command"
 import * as config from "./apm"
 import * as request from "./request"
 import { tree } from "./tree"
 import { isDeprecatedPackage } from "./deprecated-packages"
 import type { CliOptions, RunCallback } from "./apm-cli"
-import { PackageMetadata } from "./packages"
 import { PackageData } from "./stars"
+import mri from "mri"
 
 export default class Search extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
-
-Usage: apm search <package_name>
-
-Search for Atom packages/themes on the atom.io registry.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.boolean("json").describe("json", "Output matching packages as JSON array")
-    options.boolean("packages").describe("packages", "Search only non-theme packages").alias("p", "packages")
-    return options.boolean("themes").describe("themes", "Search only themes").alias("t", "themes")
+    return mri<{ help: boolean; json: boolean; packages: boolean; themes: boolean }>(argv, {
+      alias: { h: "help" },
+      boolean: ["help", "json", "packages", "themes"],
+    })
   }
 
-  searchPackages(query, opts, callback) {
-    const qs = { q: query }
+  help() {
+    return `Usage: apm search <package_name>
+
+Search for Atom packages/themes on the atom.io registry.
+
+Options:
+  --json          Output matching packages as JSON array                                   [boolean]
+  -h, --help      Print this usage message
+  -p, --packages  Search only non-theme packages                                           [boolean]
+  -t, --themes    Search only themes                                                       [boolean]
+`
+  }
+
+  searchPackages(
+    query: string,
+    opts: ReturnType<Search["parseOptions"]>,
+    callback: (error?: string, packages?: PackageData[]) => any
+  ) {
+    const qs: { q: string; filter?: string } = { q: query }
 
     if (opts.packages) {
       qs.filter = "package"
@@ -66,9 +74,9 @@ Search for Atom packages/themes on the atom.io registry.\
     })
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
-    const [query] = Array.from(options.argv._)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
+    const query = options._[0]
 
     if (!query) {
       callback("Missing required search query")
@@ -76,9 +84,9 @@ Search for Atom packages/themes on the atom.io registry.\
     }
 
     const searchOptions = {
-      packages: options.argv.packages,
-      themes: options.argv.themes,
-    }
+      packages: options.packages,
+      themes: options.themes,
+    } as ReturnType<Search["parseOptions"]>
 
     return this.searchPackages(query, searchOptions, function (error, packages: PackageData[]) {
       if (error != null) {
@@ -86,7 +94,7 @@ Search for Atom packages/themes on the atom.io registry.\
         return
       }
 
-      if (options.argv.json) {
+      if (options.json) {
         console.log(JSON.stringify(packages))
       } else {
         const heading = `Search Results For '${query}'`.cyan

@@ -7,31 +7,34 @@
  */
 import path from "path"
 import CSON from "season"
-import yargs from "yargs"
 import Command from "./command"
 import fs from "./fs"
 import type { CliOptions, RunCallback } from "./apm-cli"
 import { PathLike } from "fs-plus"
+import mri from "mri"
 
 export default class Unlink extends Command {
   parseOptions(argv: string[]) {
-    const options = yargs(argv).wrap(Math.min(100, yargs.terminalWidth()))
-    options.usage(`\
+    return mri<{ help: boolean; dev: boolean; hard: boolean; all: boolean; _: string[] }>(argv, {
+      alias: { h: "help", d: "dev", a: "all" },
+      boolean: ["help", "dev", "hard", "all"],
+    })
+  }
 
-Usage: apm unlink [<package_path>]
+  help() {
+    return `Usage: apm unlink [<package_path>]
 
 Delete the symlink in ~/.atom/packages for the package. The package in the
 current working directory is unlinked if no path is given.
 
-Run \`apm links\` to view all the currently linked packages.\
-`)
-    options.alias("h", "help").describe("help", "Print this usage message")
-    options.alias("d", "dev").boolean("dev").describe("dev", "Unlink package from ~/.atom/dev/packages")
-    options.boolean("hard").describe("hard", "Unlink package from ~/.atom/packages and ~/.atom/dev/packages")
-    return options
-      .alias("a", "all")
-      .boolean("all")
-      .describe("all", "Unlink all packages in ~/.atom/packages and ~/.atom/dev/packages")
+Run \`apm links\` to view all the currently linked packages.
+
+Options:
+  --hard      Unlink package from ~/.atom/packages and ~/.atom/dev/packages                [boolean]
+  -h, --help  Print this usage message
+  -d, --dev   Unlink package from ~/.atom/dev/packages                                     [boolean]
+  -a, --all   Unlink all packages in ~/.atom/packages and ~/.atom/dev/packages             [boolean]
+`
   }
 
   getDevPackagePath(packageName: string) {
@@ -53,7 +56,7 @@ Run \`apm links\` to view all the currently linked packages.\
     }
   }
 
-  unlinkAll(options: CliOptions, callback: (error?: string | Error) => any) {
+  unlinkAll(options: ReturnType<Unlink["parseOptions"]>, callback: (error?: string | Error) => any) {
     try {
       let child: string, packagePath: string
       for (child of fs.list(this.atomDevPackagesDirectory)) {
@@ -62,7 +65,7 @@ Run \`apm links\` to view all the currently linked packages.\
           this.unlinkPath(packagePath)
         }
       }
-      if (!options.argv.dev) {
+      if (!options.dev) {
         for (child of fs.list(this.atomPackagesDirectory)) {
           packagePath = path.join(this.atomPackagesDirectory, child)
           if (fs.isSymbolicLinkSync(packagePath)) {
@@ -76,11 +79,11 @@ Run \`apm links\` to view all the currently linked packages.\
     }
   }
 
-  unlinkPackage(options: CliOptions, callback: (error?: string | Error) => any) {
-    let error: Error, left: any, packageName: string
-    const packagePath = (left = options.argv._[0]?.toString()) != null ? left : "."
+  unlinkPackage(options: ReturnType<Unlink["parseOptions"]>, callback: (error?: string | Error) => any) {
+    const packagePath = options._[0]?.toString() || "."
     const linkPath = path.resolve(process.cwd(), packagePath)
 
+    let packageName: string | undefined
     try {
       packageName = CSON.readFileSync(CSON.resolve(path.join(linkPath, "package"))).name
     } catch (error3) {
@@ -90,7 +93,8 @@ Run \`apm links\` to view all the currently linked packages.\
       packageName = path.basename(linkPath)
     }
 
-    if (options.argv.hard) {
+    let error: Error | undefined
+    if (options.hard) {
       try {
         this.unlinkPath(this.getDevPackagePath(packageName))
         this.unlinkPath(this.getPackagePath(packageName))
@@ -101,7 +105,7 @@ Run \`apm links\` to view all the currently linked packages.\
       }
     } else {
       let targetPath: string
-      if (options.argv.dev) {
+      if (options.dev) {
         targetPath = this.getDevPackagePath(packageName)
       } else {
         targetPath = this.getPackagePath(packageName)
@@ -116,10 +120,10 @@ Run \`apm links\` to view all the currently linked packages.\
     }
   }
 
-  run(options: CliOptions, callback: RunCallback) {
-    options = this.parseOptions(options.commandArgs)
+  run(givenOptions: CliOptions, callback: RunCallback) {
+    const options = this.parseOptions(givenOptions.commandArgs)
 
-    if (options.argv.all) {
+    if (options.all) {
       return this.unlinkAll(options, callback)
     } else {
       return this.unlinkPackage(options, callback)
