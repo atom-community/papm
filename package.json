@@ -107,7 +107,7 @@
     "prettier-config-atomic": "^3.0.10"
   },
   "engines": {
-    "node": "12 || 14 || 16",
+    "node": "12 || 14 || 16 || 18",
     "pnpm": "6"
   },
   "pnpm": {
