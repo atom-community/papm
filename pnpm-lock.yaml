@@ -10,10 +10,10 @@ specifiers:
   '@types/atom': ^1.40.11
   '@types/express': ^4.17.13
   '@types/first-mate': ^7.0.6
-  '@types/fs-plus': 3.0.2
-  '@types/glob': ^7.1.4
+  '@types/fs-plus': 3.0.3
+  '@types/glob': ^8.0.0
   '@types/hosted-git-info': ^3.0.2
-  '@types/jasmine': ^4.0.0
+  '@types/jasmine': ^5.0.0
   '@types/mv': 2.1.2
   '@types/ncp': ~2.0.5
   '@types/npm': ^7.19.0
@@ -50,7 +50,7 @@ specifiers:
   npm: ^7.24.2
   open: 7.4.2
   pnpm: ^6.32.23
-  prettier: ^2.7.1
+  prettier: ^3.0.0
   prettier-config-atomic: ^3.0.10
   q: ~1.5.1
   read: ~1.0.7
@@ -103,10 +103,10 @@ devDependencies:
   '@types/atom': 1.40.11
   '@types/express': 4.17.13
   '@types/first-mate': 7.0.6
-  '@types/fs-plus': 3.0.2
-  '@types/glob': 7.2.0
+  '@types/fs-plus': 3.0.3
+  '@types/glob': 8.1.0
   '@types/hosted-git-info': 3.0.2
-  '@types/jasmine': 4.0.3
+  '@types/jasmine': 5.1.0
   '@types/mv': 2.1.2
   '@types/ncp': 2.0.5
   '@types/npm': 7.19.0
@@ -128,7 +128,7 @@ devDependencies:
   gitly: 2.2.0
   jasmine-focused: 1.0.7
   node-downloader-helper: 2.1.1
-  prettier: 2.7.1
+  prettier: 3.0.3
   prettier-config-atomic: 3.0.10
 
 packages:
@@ -2023,8 +2023,8 @@ packages:
       '@types/event-kit': 2.4.1
     dev: true
 
-  /@types/fs-plus/3.0.2:
-    resolution: {integrity: sha512-ynKMPsbWirwdoB1FAXLtGWlUrsc4vQD5zfPoRIQXa7fBNTxQyrGBkUk7ujXVLAOMTi0fwX2tZFEAzRhKKBo7XA==}
+  /@types/fs-plus/3.0.3:
+    resolution: {integrity: sha512-RoaRxql5trvB0lEB1IgN8IbybVpVaw7JK0VXzyxnanpYQI6118spdT8HZNK0yXtaF0agUu44kvV0YLK4MkcJOw==}
     dependencies:
       '@types/node': 18.0.0
     dev: true
@@ -2032,7 +2032,14 @@ packages:
   /@types/glob/7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
-      '@types/minimatch': 3.0.5
+      '@types/minimatch': 5.1.2
+      '@types/node': 18.0.0
+    dev: true
+
+  /@types/glob/8.1.0:
+    resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
+    dependencies:
+      '@types/minimatch': 5.1.2
       '@types/node': 18.0.0
     dev: true
 
@@ -2040,8 +2047,8 @@ packages:
     resolution: {integrity: sha512-RURNTeEFUwF+ifnp7kK3WLLlTmBSlRynLNS9jeAsI6RHtSrupV0l0nO6kmpaz75EUJVexy348bR452SvmH98vQ==}
     dev: true
 
-  /@types/jasmine/4.0.3:
-    resolution: {integrity: sha512-Opp1LvvEuZdk8fSSvchK2mZwhVrsNT0JgJE9Di6MjnaIpmEXM8TLCPPrVtNTYh8+5MPdY8j9bAHMu2SSfwpZJg==}
+  /@types/jasmine/5.1.0:
+    resolution: {integrity: sha512-XOV0KsqXNX2gUSqk05RWeolIMgaAQ7+l/ozOBoQ8NGwLg+E7J9vgagODtNgfim4jCzEUP0oJ3gnXeC+Zv+Xi1A==}
     dev: true
 
   /@types/json-schema/7.0.11:
@@ -2062,8 +2069,8 @@ packages:
     resolution: {integrity: sha512-YATxVxgRqNH6nHEIsvg6k2Boc1JHI9ZbH5iWFFv/MTkchz3b1ieGDa5T0a9RznNdI0KhVbdbWSN+KWWrQZRxTw==}
     dev: true
 
-  /@types/minimatch/3.0.5:
-    resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
+  /@types/minimatch/5.1.2:
+    resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
     dev: true
 
   /@types/minipass/3.1.2:
@@ -2136,7 +2143,7 @@ packages:
   /@types/rimraf/3.0.2:
     resolution: {integrity: sha512-F3OznnSLAUxFrCEu/L5PY8+ny8DtcFRjx7fZZ9bycvXRi3KPTRS9HOitGZwvPg0juRhXFWIeKX58cnX5YqLohQ==}
     dependencies:
-      '@types/glob': 7.2.0
+      '@types/glob': 8.1.0
       '@types/node': 18.0.0
     dev: true
 
@@ -6131,6 +6138,12 @@ packages:
   /prettier/2.7.1:
     resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
     engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: true
+
+  /prettier/3.0.3:
+    resolution: {integrity: sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==}
+    engines: {node: '>=14'}
     hasBin: true
     dev: true
 
